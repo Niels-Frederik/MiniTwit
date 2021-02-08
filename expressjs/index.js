@@ -1,10 +1,12 @@
 import Express from "express";
 import sqlite3 from "sqlite3"
+import bcrypt from "bcrypt"
 
 var db = new sqlite3.Database('../tmp/minitwit.db');
 
 const app = Express();
 const port = 5000;
+app.use(Express.json())
 
 
 //Shows a users timeline or if no user is logged in it will
@@ -46,9 +48,19 @@ app.get('/login', (req,res) =>
     res.sendStatus(200)
 })
 
-app.post('/register', (req,res) =>
+app.post('/register', async (req,res) =>
 {
-    res.sendStatus(200)
+    //2 sek
+    try
+    {
+        //const user = {username: req.body.username, password: req.body.password}
+        const hashedPassword = await bcrypt.hash(req.body.password, 10)
+        console.log(hashedPassword)
+        res.sendStatus(200)
+    } catch
+    {
+        res.sendStatus(500)
+    }
 })
 
 app.delete('/logout', (req,res) =>
@@ -59,3 +71,4 @@ app.delete('/logout', (req,res) =>
 app.listen(port, () => {
     console.log(`app listening at http://localhost:${port}`)
 })
+
