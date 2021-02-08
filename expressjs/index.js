@@ -13,7 +13,7 @@ app.use(Express.json())
 //redirect to the public timeline.  This timeline shows the user's
 //messages as well as all the messages of followed users
 app.get('/', (req, res) => {
-
+    res.sendStatus(200)
 })
   
 //Displays the latest messages of all users
@@ -23,11 +23,6 @@ app.get('/public', (req,res) =>
 })
 
 //Displays a users tweets
-app.get('/:id', (res,req) =>
-{
-    res.sendStatus(200)
-})
-
 app.post('/{username}/follow', (req,res) =>
 {
     res.sendStatus(200)
@@ -43,32 +38,87 @@ app.post('/add_message', (req,res) =>
     res.sendStatus(200)
 })
 
-app.get('/login', (req,res) =>
+app.get('/login', async (req,res) =>
 {
-    res.sendStatus(200)
+    const username = req.body.username
+    const password = req.body.password
+
+    if(username && password)
+    {
+        //Get hashed password from database
+        db.get('SELECT pw_hash FROM user WHERE username = ?', username, async (err,row) =>
+        {
+            //If a user with this username exists get the password
+            if (row)
+            {
+               await bcrypt.compare(password, row.pw_hash, (err, compareResult) =>
+               {
+                   if (err)
+                   {
+                       console.log(err.message)
+                   }
+                   if (compareResult)
+                   {
+                       res.status(200).send("Succesful login")
+                   }
+                   else
+                   {
+                       res.status(400).send("Incorrect password or username")
+                   }
+               })
+            }
+        })
+    } else res.status(400).send("username or password not given")
 })
 
 app.post('/register', async (req,res) =>
 {
-    //2 sek
-    try
+    const username = req.body.username
+    const email = req.body.email
+    const password = req.body.password
+
+    //Check if all parameters are given
+    if (username && email && password)
     {
-        //const user = {username: req.body.username, password: req.body.password}
-        const hashedPassword = await bcrypt.hash(req.body.password, 10)
-        console.log(hashedPassword)
-        res.sendStatus(200)
-    } catch
-    {
-        res.sendStatus(500)
+        //Check if any users with that username already exists
+        db.get('SELECT * FROM user WHERE username = ?', username, async (err,row) =>
+        {
+            //No users are found
+            if (!row)
+            {
+                try
+                {
+                    //Salt and hash the password
+                    const pw_hash = await bcrypt.hash(req.body.password, 10)
+                    //Add the user to the database
+                    db.run('INSERT INTO user (username, email, pw_hash) VALUES (?, ?, ?)', [username, email, pw_hash], (err) =>
+                    {
+                        if (err) throw error 
+                    })
+                    res.sendStatus(200)
+                }
+                catch 
+                {
+                    res.sendStatus(500)
+                }
+            } else {
+                res.status(400).send("A user with that username already exists")
+            }
+        })
     }
 })
+
 
 app.delete('/logout', (req,res) =>
 {
     res.sendStatus(200)
 })
 
+app.get('/:id', (req,res) =>
+{
+   res.sendStatus(200)
+})
+
 app.listen(port, () => {
     console.log(`app listening at http://localhost:${port}`)
 })
-
