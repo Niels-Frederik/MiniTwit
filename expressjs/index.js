@@ -1,6 +1,6 @@
 const express = require("express");
 const sqlite3 = require('sqlite3')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
 
 var db = new sqlite3.Database('../tmp/minitwit.db');
 
@@ -12,7 +12,10 @@ app.use(express.json())
 //redirect to the public timeline.  This timeline shows the user's
 //messages as well as all the messages of followed users
 app.get('/', (req, res) => {
-    res.sendStatus(400)
+    const remoteAddress = req.socket.remoteAddress;
+    const ip = remoteAddress.replace(/^.*:/, '')
+    console.log("We got a visitor from: " + ip);
+    //res.redirect('public_timeline');
 })
   
 //Displays the latest messages of all users
@@ -108,9 +111,11 @@ app.post('/register', async (req,res) =>
 })
 
 
-app.delete('/logout', (req,res) =>
+app.get('/logout', (req,res) =>
 {
-    res.sendStatus(200)
+    //res.send('You were logged out');
+    // Remove user_id form session
+    res.redirect('/public_timeline');
 })
 
 app.get('/:id', (req,res) =>
