@@ -1,19 +1,18 @@
-import Express from "express";
-import sqlite3 from "sqlite3"
-import bcrypt from "bcrypt"
+const express = require("express");
+const sqlite3 = require('sqlite3')
+const bcrypt = require('bcrypt')
 
 var db = new sqlite3.Database('../tmp/minitwit.db');
 
-const app = Express();
+const app = express();
 const port = 5000;
-app.use(Express.json())
-
+app.use(express.json())
 
 //Shows a users timeline or if no user is logged in it will
 //redirect to the public timeline.  This timeline shows the user's
 //messages as well as all the messages of followed users
 app.get('/', (req, res) => {
-    res.sendStatus(200)
+    res.sendStatus(400)
 })
   
 //Displays the latest messages of all users
