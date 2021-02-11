@@ -48,27 +48,12 @@ const mockJSON = {
     ]
 }
 
-function loadMessages(){
-    var messageElements = []
-    mockJSON.messages.forEach( message => {
-        console.log(message);
-        messageElements.push(
-            <Message 
-                img_src={message.img_src}
-                user_href={message.user_href}
-                username={message.username}
-                text={message.text}
-                timestamp={message.timestamp}
-            />
-        )
-    })
-    return messageElements;
-}
-
 function Timeline() {
   return (
     <ul className="messages">
-        {loadMessages()}
+        {mockJSON.messages.map(message => (
+        <Message {...message } />
+      ))}
     </ul>
   );
 }
