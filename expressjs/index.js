@@ -65,7 +65,11 @@ app.get('/login', async (req,res) =>
     const query = 'SELECT pw_hash FROM user WHERE username = ?';
     const result = await db.get(query, username)
 
-    if (!result) res.status(400).send("Incorrent username or password")
+    if (!result) 
+    {
+        res.status(400).send("Incorrent username or password")
+        return
+    }
 
     try
     {
