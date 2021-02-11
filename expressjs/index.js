@@ -38,14 +38,44 @@ app.get('/public', (req,res) =>
 })
 
 //Displays a users tweets
-app.post('/{username}/follow', (req,res) =>
+app.post('/:username/follow', async (req,res) =>
 {
-    res.sendStatus(200)
+    const userId = await getUserIdFromJwtToken(req)
+	if (userId == null) 
+	{
+		res.sendStatus(401)
+		return
+	}
+	const whomId = await getUserId(req.params.username)
+	if (whomId == null) 
+	{
+		res.sendStatus(404)
+		return
+	}
+	const query = 'INSERT INTO FOLLOWER (who_id, whom_id) values (?, ?)'
+	await db.run(query, [userId, whomId])
+    res.status(200).send("You are now following " + req.params.username)
+	//res.redirect()
 })
 
-app.delete('/:username/unfollow', (req,res) =>
+app.delete('/:username/unfollow', async (req,res) =>
 {
-    res.sendStatus(200)
+	const userId = await getUserIdFromJwtToken(req)
+	if (userId == null)
+	{
+		res.sendStatus(401)
+		return
+	}
+	const whomId = await getUserId(req.params.username)
+	if (whomId == null) 
+	{
+		res.sendStatus(404)
+		return
+	}
+	const query = 'DELETE FROM FOLLOWER where who_id=? and whom_id=?'
+	await db.run(query, [userId, whomId])
+	res.status(200).send("You are no longer following " + req.params.username)
+	//res.redirect()
 })
 
 app.post('/add_message', async (req,res) =>
@@ -143,10 +173,7 @@ async function getUserIdFromJwtToken(req)
     try 
     {
         const verifiedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-        const query = 'SELECT user_id FROM user WHERE username = ?';
-        const row = await db.get(query, verifiedToken.username);
-        if (row) return row.user_id 
-        else return null
+		return await getUserId(verifiedToken.username)
     }
     catch
     {
@@ -158,3 +185,12 @@ async function getUserIdFromJwtToken(req)
 app.listen(port, () => {
     console.log(`app listening at http://localhost:${port}`)
 })
+
+
+async function getUserId(username)
+{
+	const query = 'SELECT user_id FROM user WHERE username = ?';
+	const row = await db.get(query, username);
+	if (row) return row.user_id
+	return null;
+}
