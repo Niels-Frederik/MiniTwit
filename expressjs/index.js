@@ -27,8 +27,14 @@ app.use(express.json())
 //Shows a users timeline or if no user is logged in it will
 //redirect to the public timeline.  This timeline shows the user's
 //messages as well as all the messages of followed users
-app.get('/', (req, res) => {
-    res.sendStatus(400)
+app.get('/', async (req, res) => {
+    const remoteAddress = req.socket.remoteAddress;
+    const ip = remoteAddress.replace(/^.*:/, '');
+    console.log("We got a visitor from: " + ip);
+
+    const userId = await getUserIdFromJwtToken(req);
+    if (userId == null) res.redirect('public_timeline');
+    else res.direct(`timeline/20`);
 })
   
 //Displays the latest messages of all users
@@ -124,9 +130,9 @@ app.post('/register', async (req,res) =>
     }
 })
     
-app.delete('/logout', (req,res) =>
+app.get('/logout', (req,res) =>
 {
-    res.sendStatus(200)
+    res.redirect('/public_timeline');
 })
 
 app.get('/:id', (req,res) =>
