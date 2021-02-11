@@ -38,9 +38,14 @@ app.get('/', async (req, res) => {
 })
   
 //Displays the latest messages of all users
-app.get('/public', (req,res) =>
+app.get('/public', async (req,res) =>
 {
-    res.sendStatus(200)
+    const PER_PAGE = 30;
+    const query =   `select * from message as m left join user as u ` +
+                    `where m.author_id = u.user_id and m.flagged = 0 ` +
+                    `order by m.pub_date desc limit ${PER_PAGE}`;
+    const result = await db.all(query);
+    res.status(200).send(result);
 })
 
 //Displays a users tweets
