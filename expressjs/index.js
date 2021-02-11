@@ -86,9 +86,16 @@ app.delete('/:username/unfollow', async (req,res) =>
 
 app.post('/add_message', async (req,res) =>
 {
-    const userId = await getUserIdFromJwtToken(req)
-    if (userId == null) res.sendStatus(400)
-    else res.status(200).send("userId: " + userId)
+    const userId = await getUserIdFromJwtToken(req);
+    const text = req.body.text;
+    if (userId == null || text == '') {
+        res.sendStatus(400);
+        return;
+    } else {
+        const query = 'INSERT INTO message (author_id, text, pub_date, flagged) VALUES (?, ?, ?, ?)';
+        await db.run(query,[userId, text, new Date(), 0]);
+        res.status(200).send("userId: " + userId)
+    }
 })
 
 app.get('/login', async (req,res) =>
