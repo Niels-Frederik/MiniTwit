@@ -159,9 +159,18 @@ app.delete('/logout', (req,res) =>
     res.sendStatus(200)
 })
 
-app.get('/:id', (req,res) =>
+app.get('/:username', async (req,res) =>
 {
-   res.sendStatus(200)
+    const userId = await getUserId(req.params.username)
+    const query = 'SELECT * FROM message WHERE author_id = ?';
+
+    const rows = await db.all(query, userId);
+    if (rows) {
+        res.json(rows).send;
+    } else {
+        res.sendStatus(400);
+    }
+
 })
 
 async function getUserIdFromJwtToken(req)
