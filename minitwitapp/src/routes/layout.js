@@ -2,6 +2,7 @@ import './layout.css';
 import { Link, Route } from 'react-router-dom'
 import login from './login'
 import register from './register'
+import timeline from './timeline'
 
 const loggedIn = false;
 const username = "norton"
@@ -35,6 +36,7 @@ function Layout() {
             {isLoggedIn()}
         </div>
         <div className="body">
+            <Route path="/public_timeline" component={timeline}/>
             <Route path="/login" component={login}/>
             <Route path="/register" component={register}/>
         </div>

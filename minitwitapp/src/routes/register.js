@@ -1,9 +1,8 @@
 import './layout.css';
-import { Link, Route } from 'react-router-dom'
 
 // Todo : implement submit functionality
 
-function Layout() {
+function Register() {
   return (
     <>
         <h2>Sign In</h2>
@@ -32,4 +31,4 @@ function Layout() {
   );
 }
 
-export default Layout;
+export default Register;
