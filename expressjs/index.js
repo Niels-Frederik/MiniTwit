@@ -1,6 +1,6 @@
 const express = require("express");
 const sqlite3 = require('sqlite3')
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt')
 
 var db = new sqlite3.Database('../tmp/minitwit.db');
 
