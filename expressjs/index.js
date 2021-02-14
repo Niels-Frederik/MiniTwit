@@ -19,7 +19,6 @@ var db = null;
 })()
 
 
-
 const app = express();
 const port = 5000;
 app.use(express.json())
@@ -33,12 +32,25 @@ app.get('/', async (req, res) => {
     console.log("We got a visitor from: " + ip);
 
     const userId = await getUserIdFromJwtToken(req);
-    if (userId == null) res.redirect('public_timeline');
-    else res.direct(`timeline/20`);
+    if (userId == null) res.redirect("public_timeline")
+    else res.redirect(`timeline`);
+})
+
+app.get('/timeline', async(req,res) =>
+{
+    const userId = await getUserIdFromJwtToken(req);
+    if (userId == null) res.redirect("public");
+    const query = "select message.*, user.* from message, user where message.flagged = 0 \
+                   and message.author_id = user.user_id and (user.user_id = ? or user.user_id \
+                   in (select whom_id from follower where who_id = ?)) \
+                   order by message.pub_date desc limit ?"
+    const result = await db.all(query, [userId, userId, 30])
+    res.send(result)
+
 })
   
 //Displays the latest messages of all users
-app.get('/public', async (req,res) =>
+app.get('/public_timeline', async (req,res) =>
 {
     const PER_PAGE = 30;
     const query =   `select * from message as m left join user as u ` +
@@ -98,8 +110,8 @@ app.post('/add_message', async (req,res) =>
         return;
     } else {
         const query = 'INSERT INTO message (author_id, text, pub_date, flagged) VALUES (?, ?, ?, ?)';
-        await db.run(query,[userId, text, new Date(), 0]);
-        res.status(200).send("userId: " + userId)
+        await db.run(query,[userId, text, (Math.floor(Date.now()/1000)), 0]);
+        res.sendStatus(200)
     }
 })
 
@@ -180,6 +192,11 @@ app.get('/logout', (req,res) =>
 app.get('/:username', async (req,res) =>
 {
     const userId = await getUserId(req.params.username)
+    if (userId == null) 
+    {
+        res.sendStatus(400)
+        return
+    }
     const query = 'SELECT * FROM message WHERE author_id = ?';
 
     const rows = await db.all(query, userId);
@@ -187,6 +204,7 @@ app.get('/:username', async (req,res) =>
         res.json(rows).send;
     } else {
         res.sendStatus(400);
+        return
     }
 
 })
