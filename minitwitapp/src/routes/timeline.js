@@ -5,35 +5,30 @@ import {getData} from '../utils/fetchData'
 import {postData} from'../utils/fetchData'
 import axios from "axios"
 import reportWebVitals from '../reportWebVitals';
+import { useEffect, useState } from 'react';
+import { computeHeadingLevel } from '@testing-library/react';
 
-async function getMessages(publicTimeline){
-    let _messages = [];
-    let url = "";
-    if(publicTimeline) url = "http://localhost:5000/public_timeline";
-    else url = "http://localhost:5000/timeline";
 
-    await axios.get(url).then((response) =>
-    {
-        //_messages.push(response);
-        console.log(response);
-        console.log(_messages);
-    })
-
+ function Timeline({ loggedIn }) {
+    const [messages, setMessages] = useState([])
+    useEffect(() => {
+        const lol = async () => {
+            let url = "";
+            if (loggedIn) url = "http://localhost:5000/timeline"
+            else url = "http://localhost:5000/public_timeline"
+            const res = await axios.get("http://localhost:5000/public_timeline")
+            setMessages(res.data)
+        }
+        lol()
+    }, [])
+    console.log(messages)
     return (
         <ul className="messages">
-            {_messages.data.map(message => (
-            <Message {...message } />
-          ))}
+        {
+            messages.map(msg => (
+            <Message { ...msg } />
+        ))}
         </ul>
-      );
-
-}
-
-async function Timeline({ loggedIn }) {
-    return (
-        <>
-            {await getMessages(loggedIn)}
-        </>
     )
 }
 

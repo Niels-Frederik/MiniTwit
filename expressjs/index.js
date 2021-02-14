@@ -66,7 +66,7 @@ app.get('/public_timeline', async (req,res) =>
     const result = await db.all(query);
     //res.status(200).send(JSON.stringify(result))
     res.send(result);
-    return;
+    //return;
 })
 
 //Displays a users tweets
