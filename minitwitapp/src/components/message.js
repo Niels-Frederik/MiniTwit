@@ -1,12 +1,12 @@
 import '../routes/layout.css';
 
-function Message({ img_src, user_href, username, text, timestamp }) {
+function Message({ username, text, timestamp }) {
   return (
     <li key={username}>
-        <img src={img_src}></img>
+        <img src={ "http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48" }></img>
         <p>
             <strong>
-                <a href={user_href}>{username}</a>
+                <a href= {`/${username}`}>{username}</a>
             </strong>
             {text}
             <small>

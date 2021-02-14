@@ -4,7 +4,7 @@ import Login from './login'
 import Register from './register'
 import Timeline from './timeline'
 
-const loggedIn = false;
+const loggedIn = true;
 const username = "norton"
 
 function isLoggedIn(){
@@ -39,13 +39,13 @@ function Layout() {
             <Route 
                 path="/public_timeline" 
                 render={(props) => (
-                    <Timeline {...props} loggedIn={true} />
+                    <Timeline {...props} publicTimeline={true} />
                 )}
             />
             <Route 
                 path="/timeline" 
                 render={(props) => (
-                    <Timeline {...props} loggedIn={false} />
+                    <Timeline {...props} publicTimeline={false} />
                 )}
             />
             <Route path="/login" component={Login}/>

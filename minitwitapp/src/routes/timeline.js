@@ -1,69 +1,27 @@
 import './layout.css';
 import Message from '../components/message'
+import {fetchData} from '../utils/fetchData'
+import {getData} from '../utils/fetchData'
+import {postData} from'../utils/fetchData'
+import axios from "axios"
+import reportWebVitals from '../reportWebVitals';
 
-const mockJSON1 = {
-    "messages":[
-    {
-        "img_src":"http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48",
-        "user_href":"/norton",
-        "username":"norton",
-        "text":"Hello World!",
-        "timestamp":"— 2021-02-01 @ 07:57"
-    },
-    {
-        "img_src":"http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48",
-        "user_href":"/hampus",
-        "username":"hampus",
-        "text":"Hello World!",
-        "timestamp":"— 2021-02-01 @ 07:57"
-    },
-    {
-        "img_src":"http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48",
-        "user_href":"/emil",
-        "username":"emil",
-        "text":"Hello World!",
-        "timestamp":"— 2021-02-01 @ 07:57"
-    },
-    ]
-}
+async function getMessages(publicTimeline){
+    let _messages = [];
+    let url = "";
+    if(publicTimeline) url = "http://localhost:5000/public_timeline";
+    else url = "http://localhost:5000/timeline";
 
-const mockJSON2 = {
-    "messages":[
+    await axios.get(url).then((response) =>
     {
-        "img_src":"http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48",
-        "user_href":"/norton",
-        "username":"norton",
-        "text":"Hello World!",
-        "timestamp":"— 2021-02-01 @ 07:57"
-    },
-    {
-        "img_src":"http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48",
-        "user_href":"/yarl",
-        "username":"yarl",
-        "text":"Hello World!",
-        "timestamp":"— 2021-02-01 @ 07:57"
-    },
-    {
-        "img_src":"http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48",
-        "user_href":"/niller",
-        "username":"niller",
-        "text":"Hello World!",
-        "timestamp":"— 2021-02-01 @ 07:57"
-    },
-    ]
-}
+        //_messages.push(response);
+        console.log(response);
+        console.log(_messages);
+    })
 
-function getMessages(loggedIn){
-    let _messages;
-    if(loggedIn){
-        _messages = mockJSON1;
-    }
-    else{
-        _messages = mockJSON2;
-    }
     return (
         <ul className="messages">
-            {_messages.messages.map(message => (
+            {_messages.data.map(message => (
             <Message {...message } />
           ))}
         </ul>
@@ -71,10 +29,10 @@ function getMessages(loggedIn){
 
 }
 
-function Timeline({ loggedIn }) {
+async function Timeline({ loggedIn }) {
     return (
         <>
-            {getMessages(loggedIn)}
+            {await getMessages(loggedIn)}
         </>
     )
 }

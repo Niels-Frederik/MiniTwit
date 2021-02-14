@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const dotenv = require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const cookie_parser = require('cookie-parser')
+const cors = require('cors')
 
 //const db = open({'../tmp/minitwit.db', driver: sqlite3.Database});
 //const dbPromise = createDbConnection("../tmp/minitwit.db")
@@ -24,6 +25,7 @@ const app = express();
 const port = 5000;
 app.use(cookie_parser())
 app.use(express.json())
+app.use(cors())
 
 //Shows a users timeline or if no user is logged in it will
 //redirect to the public timeline.  This timeline shows the user's
@@ -32,20 +34,22 @@ app.get('/', async (req, res) => {
 
     const userId = await getUserIdFromJwtToken(req);
     if (userId == null) res.redirect("public_timeline")
-    else res.redirect(`timeline`);
+    else res.redirect("timeline");
 })
 
 app.get('/timeline', async(req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
     if (userId == null) res.redirect("public");
-    const query = "select message.*, user.* from message, user where message.flagged = 0 \
+    const query = "select user.username, message.text, message.pub_date from message, user where message.flagged = 0 \
                    and message.author_id = user.user_id and (user.user_id = ? or user.user_id \
                    in (select whom_id from follower where who_id = ?)) \
                    order by message.pub_date desc limit ?"
     const result = await db.all(query, [userId, userId, 30])
+    //res.setHeader("")
+    //res.header("Access-Control-Allow-Origin", "*");
+    //res.status(200).send(JSON.stringify(result))
     res.send(result)
-
 })
   
 //Displays the latest messages of all users
@@ -56,11 +60,13 @@ app.get('/public_timeline', async (req,res) =>
     console.log("We got a visitor from: " + ip);
 
     const PER_PAGE = 30;
-    const query =   `select * from message as m left join user as u ` +
+    const query =   `select u.username, m.text, m.pub_date from message as m left join user as u ` +
                     `where m.author_id = u.user_id and m.flagged = 0 ` +
                     `order by m.pub_date desc limit ${PER_PAGE}`;
     const result = await db.all(query);
-    res.status(200).send(result);
+    //res.status(200).send(JSON.stringify(result))
+    res.send(result);
+    return;
 })
 
 //Displays a users tweets
