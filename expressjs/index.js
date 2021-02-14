@@ -4,6 +4,7 @@ const { open } = require('sqlite');
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const cookie_parser = require('cookie-parser')
 
 //const db = open({'../tmp/minitwit.db', driver: sqlite3.Database});
 //const dbPromise = createDbConnection("../tmp/minitwit.db")
@@ -21,15 +22,13 @@ var db = null;
 
 const app = express();
 const port = 5000;
+app.use(cookie_parser())
 app.use(express.json())
 
 //Shows a users timeline or if no user is logged in it will
 //redirect to the public timeline.  This timeline shows the user's
 //messages as well as all the messages of followed users
 app.get('/', async (req, res) => {
-    const remoteAddress = req.socket.remoteAddress;
-    const ip = remoteAddress.replace(/^.*:/, '');
-    console.log("We got a visitor from: " + ip);
 
     const userId = await getUserIdFromJwtToken(req);
     if (userId == null) res.redirect("public_timeline")
@@ -52,6 +51,10 @@ app.get('/timeline', async(req,res) =>
 //Displays the latest messages of all users
 app.get('/public_timeline', async (req,res) =>
 {
+    const remoteAddress = req.socket.remoteAddress;
+    const ip = remoteAddress.replace(/^.*:/, '');
+    console.log("We got a visitor from: " + ip);
+
     const PER_PAGE = 30;
     const query =   `select * from message as m left join user as u ` +
                     `where m.author_id = u.user_id and m.flagged = 0 ` +
@@ -140,7 +143,14 @@ app.get('/login', async (req,res) =>
             {
                 const user = {username: username}
                 const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
-                res.json({accessToken: accessToken})
+
+                let options = {
+                    httpOnly: true, // The cookie only accessible by the web server
+                    signed: false // Indicates if the cookie should be signed
+                }
+
+                res.cookie('accessToken', accessToken, options)
+                res.sendStatus(200)
             } else res.status(400).send("Incorrect username or password")
         })
     }
@@ -211,8 +221,7 @@ app.get('/:username', async (req,res) =>
 
 async function getUserIdFromJwtToken(req)
 {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
+    const token = req.cookies.accessToken
     if (token == null) return null
 
     try 
