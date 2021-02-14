@@ -9,12 +9,12 @@ import { useEffect, useState } from 'react';
 import { computeHeadingLevel } from '@testing-library/react';
 
 
- function Timeline({ loggedIn }) {
+ function Timeline({ publicTimeline}) {
     const [messages, setMessages] = useState([])
     useEffect(() => {
         const lol = async () => {
             let url = "";
-            if (loggedIn) url = "http://localhost:5000/timeline"
+            if (publicTimeline) url = "http://localhost:5000/timeline"
             else url = "http://localhost:5000/public_timeline"
             const res = await axios.get("http://localhost:5000/public_timeline")
             setMessages(res.data)
