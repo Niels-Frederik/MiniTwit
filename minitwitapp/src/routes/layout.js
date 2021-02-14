@@ -1,8 +1,8 @@
 import './layout.css';
 import { Link, Route } from 'react-router-dom'
-import login from './login'
-import register from './register'
-import timeline from './timeline'
+import Login from './login'
+import Register from './register'
+import Timeline from './timeline'
 
 const loggedIn = false;
 const username = "norton"
@@ -36,9 +36,20 @@ function Layout() {
             {isLoggedIn()}
         </div>
         <div className="body">
-            <Route path="/public_timeline" component={timeline}/>
-            <Route path="/login" component={login}/>
-            <Route path="/register" component={register}/>
+            <Route 
+                path="/public_timeline" 
+                render={(props) => (
+                    <Timeline {...props} loggedIn={true} />
+                )}
+            />
+            <Route 
+                path="/timeline" 
+                render={(props) => (
+                    <Timeline {...props} loggedIn={false} />
+                )}
+            />
+            <Route path="/login" component={Login}/>
+            <Route path="/register" component={Register}/>
         </div>
         <div className="footer">
             MiniTwit &mdash; A Flask Application
