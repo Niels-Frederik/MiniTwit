@@ -1,7 +1,7 @@
 import './layout.css';
 import Message from '../components/message'
 
-const mockJSON = {
+const mockJSON1 = {
     "messages":[
     {
         "img_src":"http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48",
@@ -24,6 +24,11 @@ const mockJSON = {
         "text":"Hello World!",
         "timestamp":"— 2021-02-01 @ 07:57"
     },
+    ]
+}
+
+const mockJSON2 = {
+    "messages":[
     {
         "img_src":"http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48",
         "user_href":"/norton",
@@ -48,14 +53,30 @@ const mockJSON = {
     ]
 }
 
-function Timeline() {
-  return (
-    <ul className="messages">
-        {mockJSON.messages.map(message => (
-        <Message {...message } />
-      ))}
-    </ul>
-  );
+function getMessages(loggedIn){
+    let _messages;
+    if(loggedIn){
+        _messages = mockJSON1;
+    }
+    else{
+        _messages = mockJSON2;
+    }
+    return (
+        <ul className="messages">
+            {_messages.messages.map(message => (
+            <Message {...message } />
+          ))}
+        </ul>
+      );
+
+}
+
+function Timeline({ loggedIn }) {
+    return (
+        <>
+            {getMessages(loggedIn)}
+        </>
+    )
 }
 
 export default Timeline;
