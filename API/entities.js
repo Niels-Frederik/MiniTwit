@@ -4,9 +4,6 @@ const db = {};
 
 const sequelize = new Sequelize(
     config.database,
-    config.username,
-    config.password,
-    config
 );
 
 const Users = Sequelize.define('user', {
@@ -27,6 +24,9 @@ const Users = Sequelize.define('user', {
         type: DataTypes.STRING,
         allowNull: false
     }
+},
+{
+	timestamps: false
 });
 
 const Followers = Sequelize.define('follower', {
@@ -46,6 +46,9 @@ const Followers = Sequelize.define('follower', {
             key: 'user_id'
         }
     }
+},
+{
+	timestamps: false
 });
 
 const Messages = Sequelize.define('message', {
@@ -68,4 +71,17 @@ const Messages = Sequelize.define('message', {
 	flagged: {
 		type: DataTypes.INTEGER
 	}
+},
+{
+	timestamps: false
+
 });
+
+db.Users = Users;
+db.Followers = Followers;
+db.Messages = Messages;
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
