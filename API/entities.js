@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
     config
 );
 
-const Users = Sequelize.define('users', {
+const Users = Sequelize.define('user', {
     user_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -18,11 +18,35 @@ const Users = Sequelize.define('users', {
     username: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    pw_hash: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
-    
 });
 
-
+const Followers = Sequelize.define('follower', {
+    who_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: Users,
+            key: 'user_id'
+        }
+    },
+    whom_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: Users,
+            key: 'user_id'
+        }
+    }
+})
 
 
 
