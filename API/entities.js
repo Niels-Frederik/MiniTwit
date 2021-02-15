@@ -41,7 +41,8 @@ const Followers = sequelize.define('follower', {
         references: {
             model: Users,
             key: 'user_id'
-        }
+        },
+		primaryKey: true
     },
     whom_id: {
         type: DataTypes.INTEGER,
@@ -49,13 +50,14 @@ const Followers = sequelize.define('follower', {
         references: {
             model: Users,
             key: 'user_id'
-        }
+        },
+		primaryKey: true
     }
 },
 {
 	timestamps: false,
 	freezeTableName: true,
-	tableName: 'user'
+	tableName: 'follower'
 });
 
 const Messages = sequelize.define('message', {
@@ -82,7 +84,7 @@ const Messages = sequelize.define('message', {
 {
 	timestamps: false,
 	freezeTableName: true,
-	tableName: 'user'
+	tableName: 'message'
 
 });
 

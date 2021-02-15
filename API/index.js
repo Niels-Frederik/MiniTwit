@@ -87,8 +87,10 @@ app.post('/:username/follow', async (req,res) =>
 		res.sendStatus(404)
 		return
 	}
-	const query = 'INSERT INTO FOLLOWER (who_id, whom_id) values (?, ?)'
-	await db.run(query, [userId, whomId])
+	await database.Followers.create({
+		who_id: userId,
+		whom_id: whomId
+	})
     res.status(200).send("You are now following " + req.params.username)
 	//res.redirect()
 })
@@ -107,8 +109,12 @@ app.delete('/:username/unfollow', async (req,res) =>
 		res.sendStatus(404)
 		return
 	}
-	const query = 'DELETE FROM FOLLOWER where who_id=? and whom_id=?'
-	await db.run(query, [userId, whomId])
+	await database.Followers.destroy({
+		where: {
+			who_id: userId,
+			whom_id: whomId
+		}
+	})
 	res.status(200).send("You are no longer following " + req.params.username)
 	//res.redirect()
 })
@@ -121,8 +127,13 @@ app.post('/add_message', async (req,res) =>
         res.sendStatus(400);
         return;
     } else {
-        const query = 'INSERT INTO message (author_id, text, pub_date, flagged) VALUES (?, ?, ?, ?)';
-        await db.run(query,[userId, text, (Math.floor(Date.now()/1000)), 0]);
+		const date = (Math.floor(Date.now()/1000))
+		await database.Messages.create({
+			author_id: userId,
+			text: text,
+			pub_date: date,
+			flagged: 0
+		})
         res.sendStatus(200)
     }
 })
@@ -134,10 +145,13 @@ app.get('/login', async (req,res) =>
 
     if (!(username && password)) res.sendStatus(400)
 
-    const query = 'SELECT pw_hash FROM user WHERE username = ?';
-    const result = await db.get(query, username)
+	const row = await database.Users.findOne({
+		where: {
+			username: username
+		}
+	})
 
-    if (!result) 
+    if (!row) 
     {
         res.status(400).send("Incorrent username or password")
         return
@@ -145,10 +159,10 @@ app.get('/login', async (req,res) =>
 
     try
     {
-        await bcrypt.compare(password, result.pw_hash, function(err, result)
+        await bcrypt.compare(password, row.pw_hash, function(err, row)
         {
-            console.log(result)
-            if (result)
+            console.log(row)
+            if (row)
             {
                 const user = {username: username}
                 const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
