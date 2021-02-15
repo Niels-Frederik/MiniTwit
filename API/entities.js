@@ -1,9 +1,11 @@
 const { Sequelize, Model, DataTypes } = require('sequelize');
-const config = require('../db-config.json');
+const config = require('./config.json');
 const db = {};
 
 const sequelize = new Sequelize(
-    config.database,
+    config.username,
+    config.password,
+    config.database
 );
 
 const Users = Sequelize.define('user', {
