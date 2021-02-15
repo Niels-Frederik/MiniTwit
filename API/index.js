@@ -8,21 +8,7 @@ const cookie_parser = require('cookie-parser')
 const cors = require('cors')
 
 const { Op } = require('sequelize');
-const database = require('./entities');
-
-//const db = open({'../tmp/minitwit.db', driver: sqlite3.Database});
-//const dbPromise = createDbConnection("../tmp/minitwit.db")
-
-var db = null;
-
-(async () => {
-    // open the database
-    db = await open({
-      filename: '../tmp/minitwit.db',
-      driver: sqlite3.Database
-    })
-})()
-
+const db = require('./entities');
 
 const app = express();
 const port = 5000;
@@ -44,11 +30,40 @@ app.get('/timeline', async(req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
     if (userId == null) res.redirect("public");
-    const query = "select user.username, message.text, message.pub_date from message, user where message.flagged = 0 \
-                   and message.author_id = user.user_id and (user.user_id = ? or user.user_id \
-                   in (select whom_id from follower where who_id = ?)) \
-                   order by message.pub_date desc limit ?"
-    const result = await db.all(query, [userId, userId, 30])
+	const PER_PAGE = 30;
+	const followedId = await db.Followers.findAll({
+		where: {
+			who_id: userId
+		},
+		raw: true,
+		attributes:  ['whom_id']
+	}).then(e => e.map(v => v.whom_id))
+	const result = await db.Messages.findAll({
+		include: [{
+			model: db.Users,
+			attributes: []
+		}],
+		/*
+		include: [{
+			model: db.Followers,
+			attributes: []
+			required: false //for left join
+		}],
+		*/
+		where: {
+			[Op.and]: [
+				{ flagged: 0 }, 
+				{ [Op.or]: [ 
+					{ '$user.user_id$': userId, },
+					{ '$user.user_id$': followedId} 
+				]},
+			]
+		},
+		raw: true,
+		order: [['pub_date', 'DESC']],
+		attributes: ['user.username', 'text', 'pub_date'],
+		limit: PER_PAGE
+	})
     //res.setHeader("")
     //res.header("Access-Control-Allow-Origin", "*");
     //res.status(200).send(JSON.stringify(result))
@@ -63,11 +78,19 @@ app.get('/public_timeline', async (req,res) =>
     console.log("We got a visitor from: " + ip);
 
     const PER_PAGE = 30;
-    const query =   `select u.username, m.text, m.pub_date from message as m left join user as u ` +
-                    `where m.author_id = u.user_id and m.flagged = 0 ` +
-                    `order by m.pub_date desc limit ${PER_PAGE}`;
-    const result = await db.all(query);
-    //res.status(200).send(JSON.stringify(result))
+	const result = await db.Messages.findAll({
+		include: [{
+			model: db.Users, 
+			attributes: []
+		}],
+		where: {
+			flagged: 0
+		},
+		raw: true,
+		order: [['pub_date', 'DESC']],
+		attributes: ['user.username', 'text', 'pub_date'],
+		limit: PER_PAGE
+	})
     res.send(result);
     //return;
 })
@@ -87,7 +110,7 @@ app.post('/:username/follow', async (req,res) =>
 		res.sendStatus(404)
 		return
 	}
-	await database.Followers.create({
+	await db.Followers.create({
 		who_id: userId,
 		whom_id: whomId
 	})
@@ -109,7 +132,7 @@ app.delete('/:username/unfollow', async (req,res) =>
 		res.sendStatus(404)
 		return
 	}
-	await database.Followers.destroy({
+	await db.Followers.destroy({
 		where: {
 			who_id: userId,
 			whom_id: whomId
@@ -128,7 +151,7 @@ app.post('/add_message', async (req,res) =>
         return;
     } else {
 		const date = (Math.floor(Date.now()/1000))
-		await database.Messages.create({
+		await db.Messages.create({
 			author_id: userId,
 			text: text,
 			pub_date: date,
@@ -145,7 +168,7 @@ app.get('/login', async (req,res) =>
 
     if (!(username && password)) res.sendStatus(400)
 
-	const row = await database.Users.findOne({
+	const row = await db.Users.findOne({
 		where: {
 			username: username
 		}
@@ -205,7 +228,7 @@ app.post('/register', async (req,res) =>
         try
         {
             const pw_hash = await bcrypt.hash(req.body.password, 10)
-			await database.Users.create({
+			await db.Users.create({
 				username: username,
 				email: email,
 				pw_hash: pw_hash
@@ -233,7 +256,7 @@ app.get('/:username', async (req,res) =>
         return
     }
 
-	const messages = await database.Messages.findAll({
+	const messages = await db.Messages.findAll({
 		where: {
 			author_id: author_id
 		}
@@ -272,7 +295,7 @@ app.listen(port, () => {
 
 async function getUserId(username)
 {
-	const user = await database.Users.findOne({
+	const user = await db.Users.findOne({
 		where: {
 			username: username
 		}

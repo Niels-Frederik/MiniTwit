@@ -88,6 +88,11 @@ const Messages = sequelize.define('message', {
 
 });
 
+//Users.hasMany(Messages, {foreignKey: 'author_id'})
+Messages.belongsTo(Users, {foreignKey: 'author_id'})
+Followers.belongsTo(Users, {foreignKey: 'who_id'})
+Followers.belongsTo(Users, {foreignKey: 'whom_id'})
+
 db.Users = Users;
 db.Followers = Followers;
 db.Messages = Messages;
@@ -96,3 +101,4 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 module.exports = db;
+
