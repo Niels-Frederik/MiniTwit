@@ -46,20 +46,7 @@ const Followers = Sequelize.define('follower', {
             key: 'user_id'
         }
     }
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
+});
 
 const Messages = Sequelize.define('message', {
 	message_id: {
