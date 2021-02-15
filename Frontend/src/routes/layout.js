@@ -1,14 +1,16 @@
 import './layout.css';
-import { Link, Route } from 'react-router-dom'
+import { Link, Route, useHistory } from 'react-router-dom'
 import Login from './login'
 import Register from './register'
 import Timeline from './timeline'
 import React, { useState } from 'react';
+import axios from "axios";
 
 const username = "norton"
 
 function Layout() {
     const [loggedIn, setLoggedIn] = useState(false);
+    const history = useHistory();
 
     function isLoggedIn(){
         if(loggedIn){
@@ -16,7 +18,26 @@ function Layout() {
                 <>
                     <Link to="/timeline">my timeline</Link>
                     <Link to="/public_timeline">public timeline</Link>
-                    <Link to="/logout">sign out {username}</Link>
+                    <Link 
+                        to="/logout"
+                        onClick={ async () => {
+                            await axios({
+                                method: 'get',
+                                url: 'http://localhost:5000/logout',
+                                credentials: 'include',
+                                withCredentials: true
+                            })
+                            .then(() => {
+                                alert('Logged out');
+                                setLoggedIn(false);
+                                history.push('/public_timeline');
+                            }, () => {
+                                alert('Failed to log out');
+                            })
+                        }}
+                    >
+                        sign out {username}
+                    </Link>
                 </>
             )
         }
