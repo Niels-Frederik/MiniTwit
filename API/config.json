@@ -1,0 +1,9 @@
+{
+    "database": {
+        "development" : {
+            "dialect": "sqlite",
+            "storage": "../tmp/minitwit.db",
+            "quoteIdentifiers": false
+        }
+    }
+}
