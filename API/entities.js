@@ -61,38 +61,24 @@ const Followers = Sequelize.define('follower', {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const Rooms = sequelize.define('rooms', {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    name: {
-        type: DataTypes.STRING,
-        unique: true
-    },
-    setting_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: Settings,
-            key: 'id'
-        }
-    }
-}, {
-    timestamps: false
+const Messages = Sequelize.define('message', {
+	message_id: {
+		type: DataTypes.INTEGER,
+		primaryKey: true,
+		autoIncrement: true
+	},
+	author_id: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	},
+	text: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	pub_date: {
+		type: DataTypes.INTEGER
+	},
+	flagged: {
+		type: DataTypes.INTEGER
+	}
 });
