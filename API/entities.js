@@ -9,7 +9,7 @@ const sequelize = new Sequelize({
     }
 );
 
-const Users = Sequelize.define('user', {
+const Users = sequelize.define('user', {
     user_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -29,10 +29,12 @@ const Users = Sequelize.define('user', {
     }
 },
 {
-	timestamps: false
+	timestamps: false,
+	freezeTableName: true,
+	tableName: 'user'
 });
 
-const Followers = Sequelize.define('follower', {
+const Followers = sequelize.define('follower', {
     who_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -51,10 +53,12 @@ const Followers = Sequelize.define('follower', {
     }
 },
 {
-	timestamps: false
+	timestamps: false,
+	freezeTableName: true,
+	tableName: 'user'
 });
 
-const Messages = Sequelize.define('message', {
+const Messages = sequelize.define('message', {
 	message_id: {
 		type: DataTypes.INTEGER,
 		primaryKey: true,
@@ -76,7 +80,9 @@ const Messages = Sequelize.define('message', {
 	}
 },
 {
-	timestamps: false
+	timestamps: false,
+	freezeTableName: true,
+	tableName: 'user'
 
 });
 

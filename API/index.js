@@ -7,6 +7,9 @@ const jwt = require('jsonwebtoken');
 const cookie_parser = require('cookie-parser')
 const cors = require('cors')
 
+const { Op } = require('sequelize');
+const database = require('./entities');
+
 //const db = open({'../tmp/minitwit.db', driver: sqlite3.Database});
 //const dbPromise = createDbConnection("../tmp/minitwit.db")
 
@@ -176,11 +179,10 @@ app.post('/register', async (req,res) =>
     if (!(username && email && password)) res.sendStatus(400)
 
     //Check if any users with that username already exists
-    const query = 'SELECT * FROM user WHERE username = ?';
-    const result = await db.get(query, username)
+	const userid = await getUserId(username)
     
     //A user already exists
-    if (result)
+    if (userid)
     {
         res.status(400).send("A user with that username already exists")
     }
@@ -189,8 +191,11 @@ app.post('/register', async (req,res) =>
         try
         {
             const pw_hash = await bcrypt.hash(req.body.password, 10)
-            const query = 'INSERT INTO user (username, email, pw_hash) VALUES (?, ?, ?)'
-            await db.run(query, [username, email, pw_hash])
+			await database.Users.create({
+				username: username,
+				email: email,
+				pw_hash: pw_hash
+			});
             res.sendStatus(200)
         }
         catch 
@@ -213,11 +218,15 @@ app.get('/:username', async (req,res) =>
         res.sendStatus(400)
         return
     }
-    const query = 'SELECT * FROM message WHERE author_id = ?';
 
-    const rows = await db.all(query, userId);
-    if (rows) {
-        res.json(rows).send;
+	const messages = await database.Messages.findAll({
+		where: {
+			author_id: author_id
+		}
+
+	});
+    if (messages) {
+        res.json(messages).send;
     } else {
         res.sendStatus(400);
         return
@@ -249,8 +258,11 @@ app.listen(port, () => {
 
 async function getUserId(username)
 {
-	const query = 'SELECT user_id FROM user WHERE username = ?';
-	const row = await db.get(query, username);
-	if (row) return row.user_id
+	const user = await database.Users.findOne({
+		where: {
+			username: username
+		}
+	});
+	if (user) return user.user_id
 	return null;
 }
