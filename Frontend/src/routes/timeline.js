@@ -14,14 +14,20 @@ import { computeHeadingLevel } from '@testing-library/react';
     useEffect(() => {
         const lol = async () => {
             let url = "";
-            if (publicTimeline) url = "http://localhost:5000/timeline"
-            else url = "http://localhost:5000/public_timeline"
-            const res = await axios.get("http://localhost:5000/public_timeline")
-            setMessages(res.data)
+            if (publicTimeline) url = "http://localhost:5000/public_timeline"
+            else url = "http://localhost:5000/timeline"
+            const res = await axios({
+                    method: 'get',
+                    url: url,
+                    credentials: 'include',
+                    withCredentials: true
+
+                })
+            if(res.data.length > 0) setMessages(res.data)
         }
         lol()
     }, [])
-    console.log(messages)
+    console.log("messages", messages)
     return (
         <ul className="messages">
         {

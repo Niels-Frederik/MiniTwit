@@ -25,7 +25,7 @@ const app = express();
 const port = 5000;
 app.use(cookie_parser())
 app.use(express.json())
-app.use(cors())
+app.use(cors({ origin: true, credentials: true }))
 
 //Shows a users timeline or if no user is logged in it will
 //redirect to the public timeline.  This timeline shows the user's
@@ -40,7 +40,8 @@ app.get('/', async (req, res) => {
 app.get('/timeline', async(req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
-    if (userId == null) res.redirect("public");
+    console.log(req.cookies)
+    if (userId == null) res.send();
     const query = "select user.username, message.text, message.pub_date from message, user where message.flagged = 0 \
                    and message.author_id = user.user_id and (user.user_id = ? or user.user_id \
                    in (select whom_id from follower where who_id = ?)) \
@@ -124,7 +125,7 @@ app.post('/add_message', async (req,res) =>
     }
 })
 
-app.get('/login', async (req,res) =>
+app.post('/login', async (req,res) =>
 {
     const username = req.body.username
     const password = req.body.password
@@ -152,7 +153,8 @@ app.get('/login', async (req,res) =>
 
                 let options = {
                     httpOnly: true, // The cookie only accessible by the web server
-                    signed: false // Indicates if the cookie should be signed
+                    signed: false, // Indicates if the cookie should be signed
+                    secure: true
                 }
 
                 res.cookie('accessToken', accessToken, options)
