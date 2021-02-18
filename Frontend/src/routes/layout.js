@@ -1,12 +1,10 @@
 import './layout.css';
-import { Link, Route, useHistory } from 'react-router-dom'
+import { Link, Redirect, Route, useHistory } from 'react-router-dom'
 import Login from './login'
 import Register from './register'
 import Timeline from './timeline'
 import React, { useState } from 'react';
 import axios from "axios";
-
-const username = "norton"
 
 function Layout() {
     const [loggedIn, setLoggedIn] = useState(false);
@@ -16,8 +14,8 @@ function Layout() {
         if(loggedIn){
             return(
                 <>
-                    <Link to="/timeline">my timeline</Link>
-                    <Link to="/public_timeline">public timeline</Link>
+                    <Link to="/timeline">My Timeline</Link>
+                    <Link to="/public_timeline">Public Timeline</Link>
                     <Link 
                         to="/logout"
                         onClick={ async () => {
@@ -36,7 +34,7 @@ function Layout() {
                             })
                         }}
                     >
-                        sign out {username}
+                        sign out 
                     </Link>
                 </>
             )
@@ -44,9 +42,9 @@ function Layout() {
         else{
             return(
                 <>
-                    <Link to="/public_timeline">public timeline</Link>
-                    <Link to="/register">sign up</Link>
-                    <Link to="/login">sign in</Link>
+                    <Link to="/public_timeline">Public Timeline</Link>
+                    <Link to="/register">Sign Up</Link>
+                    <Link to="/login">Sign In</Link>
                 </>
             )
         }
@@ -65,6 +63,12 @@ function Layout() {
                         <Timeline {...props} publicTimeline={true} />
                     )}
                 />
+                <Route
+                    path="/"
+                        render={(props) => (
+                            <Redirect to = "/public_timeline"/>
+                    )}
+                />
                 <Route 
                     path="/timeline" 
                     render={(props) => (
@@ -80,7 +84,7 @@ function Layout() {
                 <Route path="/register" component={Register}/>
             </div>
             <div className="footer">
-                MiniTwit &mdash; A Flask Application
+                MiniTwit &mdash; A shit application 
             </div>
         </div>
     );
