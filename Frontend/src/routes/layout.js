@@ -63,12 +63,7 @@ function Layout() {
                         <Timeline {...props} publicTimeline={true} />
                     )}
                 />
-                <Route
-                    path="/"
-                        render={(props) => (
-                            <Redirect to = "/public_timeline"/>
-                    )}
-                />
+                
                 <Route 
                     path="/timeline" 
                     render={(props) => (
@@ -82,6 +77,13 @@ function Layout() {
                     )}
                 />
                 <Route path="/register" component={Register}/>
+                
+                <Route
+                    path="/"
+                        render={(props) => (
+                            <Redirect to = "/public_timeline"/>
+                    )}
+                />
             </div>
             <div className="footer">
                 MiniTwit &mdash; A shit application 

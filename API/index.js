@@ -30,7 +30,12 @@ app.get('/timeline', async(req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
     console.log(req.cookies)
-    if (userId == null) res.send();
+	if (userId == null) 
+	{
+		//res.send()
+		res.redirect('public_timeline');
+		return
+	}
 	const PER_PAGE = 30;
 	const followedId = await db.Followers.findAll({
 		where: {
@@ -193,7 +198,7 @@ app.post('/login', async (req,res) =>
 
                 let options = {
                     httpOnly: true, // The cookie only accessible by the web server
-                    signed: false, // Indicates if the cookie should be signed
+					signed: false, // Indicates if the cookie should be signed
                     //secure: true
                 }
 
@@ -246,7 +251,11 @@ app.post('/register', async (req,res) =>
     
 app.get('/logout', (req,res) =>
 {
-    res.redirect('/public_timeline');
+	//console.log(req.cookies)
+	//res.cookie('accessToken', {expires: Date.now()});
+	res.clearCookie('accessToken')
+	res.redirect('/public_timeline');
+	return
 })
 
 app.get('/:username', async (req,res) =>
@@ -276,8 +285,7 @@ app.get('/:username', async (req,res) =>
 async function getUserIdFromJwtToken(req)
 {
 	const token = req.cookies.accessToken
-	console.log(token)
-    if (token == null) return null
+    if (token == null || token == undefined) return null
 
     try 
     {
@@ -290,12 +298,6 @@ async function getUserIdFromJwtToken(req)
     }
 }
 
-
-app.listen(port, () => {
-    console.log(`app listening at http://localhost:${port}`)
-})
-
-
 async function getUserId(username)
 {
 	const user = await db.Users.findOne({
@@ -306,3 +308,7 @@ async function getUserId(username)
 	if (user) return user.user_id
 	return null;
 }
+
+app.listen(port, () => {
+    console.log(`app listening at http://localhost:${port}`)
+})
