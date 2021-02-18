@@ -23,6 +23,7 @@ function Login({ setLoggedIn }) {
         .then(() => {
             setLoggedIn(true);
             setHasSubmitted(true);
+            console.log()
         }, () => {
             alert('Wrong username or password');
         });

@@ -194,7 +194,7 @@ app.post('/login', async (req,res) =>
                 let options = {
                     httpOnly: true, // The cookie only accessible by the web server
                     signed: false, // Indicates if the cookie should be signed
-                    secure: true
+                    //secure: true
                 }
 
                 res.cookie('accessToken', accessToken, options)
@@ -275,7 +275,8 @@ app.get('/:username', async (req,res) =>
 
 async function getUserIdFromJwtToken(req)
 {
-    const token = req.cookies.accessToken
+	const token = req.cookies.accessToken
+	console.log(token)
     if (token == null) return null
 
     try 
