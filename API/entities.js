@@ -87,8 +87,10 @@ const Messages = sequelize.define('message', {
 });
 
 Messages.belongsTo(Users, {foreignKey: 'author_id'});
-Users.belongsToMany(Users, {through: Followers, as: 'who'});
-Users.belongsToMany(Users, {through: Followers, as: 'whom'});
+// Users.belongsToMany(Users, {through: Followers, as: 'who'});
+// Users.belongsToMany(Users, {through: Followers, as: 'whom'});
+Followers.belongsTo(Users, {as: 'who', foreignKey: 'who_id'}); // When including, use 'as: "who"', to include the who User
+Followers.belongsTo(Users, {as: 'whom', foreignKey: 'whom_id'}); // When including, use 'as: "whom"', to include the whom User
 
 db.Users = Users;
 db.Followers = Followers;
