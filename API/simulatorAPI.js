@@ -72,9 +72,15 @@ app.get('/msgs', async (req, res) => {
     updateLatest(req);
 
     notFromSim = notReqFromSimulator(req);
-    if (notFromSim) req.send(notFromSim);
+    if (notFromSim) {
+        res.send(notFromSim);
+        return;
+    }
+        
+        
     
-    const limit = req.query.no;
+    let limit = req.query.no;
+    if (!limit) limit = 100;
     const result = await db.Messages.findAll({
 		include: [{
 			model: db.Users, 
@@ -98,7 +104,7 @@ app.get('/msgs', async (req, res) => {
         filteredMsgs.push(filteredMsg);
     });
     
-    res.json(filteredMsgs);    
+    res.send(filteredMsgs);    
 });
 
 app.get('/msgs/:username', async (req, res) => 
@@ -114,7 +120,8 @@ app.get('/msgs/:username', async (req, res) =>
         return;
     }
     
-    const limit = req.query.no;
+    let limit = req.query.no;
+    if (!limit) limit = 100;
     let result = null;
     result = await db.Messages.findAll({
         include: [{
