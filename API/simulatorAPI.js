@@ -238,23 +238,29 @@ app.get('/fllws/:username', async(req, res) => {
         return;
     }
 
-    const limit = req.query.no;
+    let limit = req.query.no;
     if (limit == null) limit == 100;
 
-    const result = await db.Users.findAll({
+    const result = await db.Followers.findAll({
 		include: {
-			model: db.Followers,
-            where: {
-                whom_id:  Sequelize.col('user.user_id')
-            }
-		},
-		where: {
-            who_id: userId
-		},
-		raw: true,
-		attributes: ['user.username'],
+			model: db.Users,
+            as: 'who',
+            attributes: []
+        },
+        where: {
+            whom_id: userId
+        },
+        attributes: ['who.username'],
+        raw: true,
 		limit: limit
 	});
+
+
+    let resultList = [];
+    result.forEach((item, i) => {
+        resultList.push(item['username']);
+    });
+    res.send({'followers': resultList});
 }); 
 
 app.listen(port, () => {
