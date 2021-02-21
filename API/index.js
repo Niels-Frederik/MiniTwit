@@ -115,6 +115,7 @@ app.post('/:username/follow', async (req,res) =>
 		res.sendStatus(404)
 		return
 	}
+	console.log(userId)
 	await db.Followers.create({
 		who_id: userId,
 		whom_id: whomId
@@ -151,7 +152,7 @@ app.post('/add_message', async (req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
     const text = req.body.text;
-    if (userId == null || text == '') {
+    if (userId == null || text == '' || text == null) {
         res.sendStatus(400);
         return;
     } else {

@@ -41,7 +41,7 @@ const Followers = sequelize.define('follower', {
             model: Users,
             key: 'user_id'
         },
-        primaryKey: true
+			primaryKey: true
     },
     whom_id: {
         type: DataTypes.INTEGER,
@@ -49,7 +49,7 @@ const Followers = sequelize.define('follower', {
             model: Users,
             key: 'user_id'
         },
-        primaryKey: true
+			primaryKey: true
     }
 },
 {
