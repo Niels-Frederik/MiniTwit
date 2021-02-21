@@ -72,7 +72,9 @@ app.get('/timeline', async(req,res) =>
     //res.setHeader("")
     //res.header("Access-Control-Allow-Origin", "*");
     //res.status(200).send(JSON.stringify(result))
-    res.send(result)
+
+	const obj = {"messages": result, "followedOptions": -1}
+    res.send(obj)
 })
   
 //Displays the latest messages of all users
@@ -96,7 +98,10 @@ app.get('/public_timeline', async (req,res) =>
 		attributes: ['user.username', 'text', 'pub_date'],
 		limit: PER_PAGE
 	})
-    res.send(result);
+
+	const obj = {"messages": result, "followedOptions": -1}
+
+    res.send(obj);
     //return;
 })
 
@@ -257,8 +262,10 @@ app.get('/logout', (req,res) =>
 
 app.get('/:username', async (req,res) =>
 {
-    const userId = await getUserId(req.params.username)
-    if (userId == null) 
+    const whomId = await getUserId(req.params.username)
+	const userId = await getUserIdFromJwtToken(req)
+
+    if (whomId == null) 
     {
         res.sendStatus(400)
         return
@@ -266,13 +273,29 @@ app.get('/:username', async (req,res) =>
 
 	const messages = await db.Messages.findAll({
 		where: {
-			author_id: userId
+			author_id: whomId
 		},
 		attributes: ["text", "pub_date"]
 	});
+
+
     if (messages) {
 
 		var m = []
+
+		const followed = await db.Followers.findOne({
+			where: {
+				who_id: userId,
+				whom_Id: whomId 
+			},
+			raw: true,
+			attributes:  ['whom_id']
+		})
+
+		followedOptions = 0
+		if (whomId == userId) followedOptions = 0
+		else if (followed) followedOptions = 1
+		else followedOptions = 2
 
 		messages.forEach(element => 
 		{
@@ -280,20 +303,21 @@ app.get('/:username', async (req,res) =>
 			{
 				"username": req.params.username,
 				"text": element.dataValues.text,
-				"pub_date" : element.dataValues.pub_date
+				"pub_date" : element.dataValues.pub_date,
 			})
 		})
 
-        res.json(m).send;
+		const obj = 
+		{
+			"messages":m,
+			"followedOptions": followedOptions
+		}
+
+        res.json(obj).send;
     } else {
         res.sendStatus(400);
         return
     }
-
-	//username
-	//Date
-	//text
-	//(1,2,3) Following, not following, is you
 
 })
 

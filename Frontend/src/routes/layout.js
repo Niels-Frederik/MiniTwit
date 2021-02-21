@@ -85,7 +85,7 @@ function Layout() {
                     )}
                 />
 
-                <Switch>
+            <Switch>
                 <Route 
                     path="/login" 
                     render={(props) => (
@@ -96,6 +96,7 @@ function Layout() {
                 <Route path="/register" component={Register}/>
 
                 <Route path="/:username"
+                    exact={true}
                     render={(props) => (
                         <Timeline {...props} publicTimeline = {false} userMessages={true}/>
                     )}
