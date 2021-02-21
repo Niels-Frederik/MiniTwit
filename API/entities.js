@@ -40,14 +40,16 @@ const Followers = sequelize.define('follower', {
         references: {
             model: Users,
             key: 'user_id'
-        }
+        },
+        primaryKey: true
     },
     whom_id: {
         type: DataTypes.INTEGER,
         references: {
             model: Users,
             key: 'user_id'
-        }
+        },
+        primaryKey: true
     }
 },
 {

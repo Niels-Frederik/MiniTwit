@@ -29,7 +29,6 @@ app.get('/', async (req, res) => {
 app.get('/timeline', async(req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
-    console.log(req.cookies)
 	if (userId == null) 
 	{
 		//res.send()
@@ -190,7 +189,6 @@ app.post('/login', async (req,res) =>
     {
         await bcrypt.compare(password, row.pw_hash, function(err, row)
         {
-            console.log(row)
             if (row)
             {
                 const user = {username: username}
@@ -268,15 +266,33 @@ app.get('/:username', async (req,res) =>
 	const messages = await db.Messages.findAll({
 		where: {
 			author_id: userId
-		}
-
+		},
+		attributes: ["text", "pub_date"]
 	});
     if (messages) {
-        res.json(messages).send;
+
+		var m = []
+
+		messages.forEach(element => 
+		{
+			m.push(
+			{
+				"username": req.params.username,
+				"text": element.dataValues.text,
+				"pub_date" : element.dataValues.pub_date
+			})
+		})
+
+        res.json(m).send;
     } else {
         res.sendStatus(400);
         return
     }
+
+	//username
+	//Date
+	//text
+	//(1,2,3) Following, not following, is you
 
 })
 

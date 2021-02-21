@@ -1,5 +1,5 @@
 import './layout.css';
-import { Link, Redirect, Route, useHistory } from 'react-router-dom'
+import { Link, Redirect, Route, useHistory, Switch } from 'react-router-dom'
 import Login from './login'
 import Register from './register'
 import Timeline from './timeline'
@@ -74,30 +74,41 @@ function Layout() {
                 <Route 
                     path="/public_timeline" 
                     render={(props) => (
-                        <Timeline {...props} publicTimeline={true} />
+                        <Timeline {...props} publicTimeline={true} userMessages={false} />
                     )}
                 />
                 
                 <Route 
                     path="/timeline" 
                     render={(props) => (
-                        <Timeline {...props} publicTimeline={false} />
+                        <Timeline {...props} publicTimeline={false} userMessages={false} />
                     )}
                 />
+
+                <Switch>
                 <Route 
                     path="/login" 
                     render={(props) => (
                         <Login {...props} setLoggedIn = {setLoggedIn} />
                     )}
                 />
+
                 <Route path="/register" component={Register}/>
+
+                <Route path="/:username"
+                    render={(props) => (
+                        <Timeline {...props} publicTimeline = {false} userMessages={true}/>
+                    )}
+                />
                 
                 <Route
                     path="/"
+                    exact={true}
                         render={(props) => (
                             <Redirect to = "/public_timeline"/>
                     )}
                 />
+                </Switch>
             </div>
             <div className="footer">
                 MiniTwit &mdash; A shit application 
