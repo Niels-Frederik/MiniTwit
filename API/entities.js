@@ -1,13 +1,31 @@
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const config = require('./config.json');
 const db = {};
+//console.log(process.env.NODE_ENV !)
+let sequelize = (process.env.NODE_ENV == 'production')?
 
-const sequelize = new Sequelize({
-    dialect: config.database.development.dialect,
-    storage: config.database.development.storage,
-    quoteIdentifiers: config.database.development.quoteIdentifiers
-    }
-);
+    new Sequelize({
+        dialect: config.development.database.dialect,
+        storage: config.development.database.storage,
+        quoteIdentifiers: config.development.database.quoteIdentifiers
+        }
+    )
+: new Sequelize
+    ({
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        host: process.env.DB_HOST,
+        database: process.env.DB_NAME,
+        port: process.env.DB_PORT,
+        dialect: 'postgres',
+        dialectOptions: {
+            ssl: {
+            require: true,
+            rejectUnauthorized: false
+            }
+        }
+    })
+
 
 const Users = sequelize.define('user', {
     user_id: {
