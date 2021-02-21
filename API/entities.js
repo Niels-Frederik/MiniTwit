@@ -37,21 +37,17 @@ const Users = sequelize.define('user', {
 const Followers = sequelize.define('follower', {
     who_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         references: {
             model: Users,
             key: 'user_id'
-        },
-		primaryKey: true
+        }
     },
     whom_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         references: {
             model: Users,
             key: 'user_id'
-        },
-		primaryKey: true
+        }
     }
 },
 {
@@ -88,10 +84,9 @@ const Messages = sequelize.define('message', {
 
 });
 
-//Users.hasMany(Messages, {foreignKey: 'author_id'})
-Messages.belongsTo(Users, {foreignKey: 'author_id'})
-Followers.belongsTo(Users, {foreignKey: 'who_id'})
-Followers.belongsTo(Users, {foreignKey: 'whom_id'})
+Messages.belongsTo(Users, {foreignKey: 'author_id'});
+Users.belongsToMany(Users, {through: Followers, as: 'who'});
+Users.belongsToMany(Users, {through: Followers, as: 'whom'});
 
 db.Users = Users;
 db.Followers = Followers;

@@ -267,7 +267,7 @@ app.get('/:username', async (req,res) =>
 
 	const messages = await db.Messages.findAll({
 		where: {
-			author_id: author_id
+			author_id: userId
 		}
 
 	});
