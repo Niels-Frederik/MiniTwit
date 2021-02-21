@@ -22,16 +22,13 @@ import { useParams } from 'react-router-dom';
                     credentials: 'include',
                     withCredentials: true
                 })
-            //if(res.data.length > 0) 
             setMessages(res.data);
-            //messages = res.data
         }
         getTimeline()
     }, [])
 
 	async function submitPost(e) {
 		e.preventDefault();
-		console.log(text)
 		var body = {
 			text: text
 		}
@@ -42,7 +39,6 @@ import { useParams } from 'react-router-dom';
 			withCredentials: true,
 			data: body,
 		})
-		console.log(res)
 		window.location.reload(true)
 	}
 
@@ -54,11 +50,11 @@ import { useParams } from 'react-router-dom';
     return (
 		<div>
 			<div>
-				{publicTimeline ? 
+				{userMessages ? null : publicTimeline ?
 						<h2> Public Timeline </h2> :
 						<h2> My Timeline </h2>
 				}
-				{!publicTimeline ?
+				{!publicTimeline && !userMessages ?
 				<div>
 					<p> What's on your mind	username? </p>
 					<div>
