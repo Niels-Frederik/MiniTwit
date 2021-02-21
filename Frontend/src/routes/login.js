@@ -1,7 +1,8 @@
 import './layout.css';
 import React, { useState } from 'react';
 import axios from "axios";
-import { Redirect } from 'react-router-dom'
+import { Redirect} from 'react-router-dom'
+import Layout from './layout';
 
 function Login({ setLoggedIn }) {
     const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -23,7 +24,6 @@ function Login({ setLoggedIn }) {
         .then(() => {
             setLoggedIn(true);
             setHasSubmitted(true);
-            console.log()
         }, () => {
             alert('Wrong username or password');
         });

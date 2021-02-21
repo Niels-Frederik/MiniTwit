@@ -197,7 +197,7 @@ app.post('/login', async (req,res) =>
                 const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
 
                 let options = {
-                    httpOnly: true, // The cookie only accessible by the web server
+                    httpOnly: false, // The cookie only accessible by the web server
 					signed: false, // Indicates if the cookie should be signed
                     //secure: true
                 }
@@ -251,8 +251,6 @@ app.post('/register', async (req,res) =>
     
 app.get('/logout', (req,res) =>
 {
-	//console.log(req.cookies)
-	//res.cookie('accessToken', {expires: Date.now()});
 	res.clearCookie('accessToken')
 	res.redirect('/public_timeline');
 	return
