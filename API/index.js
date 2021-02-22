@@ -24,6 +24,7 @@ app.get('/', async (req, res) => {
     else res.redirect("timeline");
 })
 
+
 app.get('/timeline', async(req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
@@ -202,6 +203,8 @@ app.post('/login', async (req,res) =>
                     httpOnly: false, // The cookie only accessible by the web server
 					signed: false, // Indicates if the cookie should be signed
                     //secure: true
+					domain: process.env.NODE_ENV === "development" ? null : "http://161.35.214.217"
+					//domain: ""
                 }
 
                 res.cookie('accessToken', accessToken, options)
