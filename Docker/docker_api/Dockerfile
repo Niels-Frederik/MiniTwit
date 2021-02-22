@@ -1,5 +1,4 @@
 FROM node:15
-ENV NODE_ENV=production
 WORKDIR /usr/src/app 
 
 COPY API/package.json ./
@@ -8,6 +7,7 @@ RUN apt update && apt install -y apt-transport-https ca-certificates sqlite3
 RUN npm install -production
 
 COPY API/. .
+RUN EXPORT NODE_ENV=production
 
 EXPOSE 5000
 
