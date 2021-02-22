@@ -5,13 +5,12 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 
- function Timeline({ publicTimeline, userMessages, userPage }) {
+ function Timeline({ publicTimeline, userMessages }) {
     const [messages, setMessages] = useState([])
     const [followingOptions, setFollowingOptions] = useState(-1)
     let { username } = useParams();
 	const [value, setValue] = useState(0)
 	let text = ""
-    const once = false;
 
     useEffect(() => {
         const getTimeline = async () => {
@@ -26,12 +25,13 @@ import { useParams } from 'react-router-dom';
                     withCredentials: true
                 }).then((res) =>
                 {
-                    console.log(res.data.messages)
-                    setMessages(res.data.messages)
-                    setFollowingOptions(res.data.followedOptions)
+                    console.log(res.data.messages);
+                    setMessages(res.data.messages);
+                    setFollowingOptions(res.data.followedOptions);
+                    
                 })
         }
-        if(!userPage)getTimeline();
+        getTimeline();
     }, [])
 
 	async function submitPost(e) {
