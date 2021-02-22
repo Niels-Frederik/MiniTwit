@@ -114,7 +114,7 @@ app.post('/:username/follow', async (req,res) =>
 	}
 	const whomId = await getUserId(req.params.username)
 	if (whomId == null) 
-	{
+	{orton
 		res.sendStatus(404)
 		return
 	}

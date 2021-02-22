@@ -71,20 +71,20 @@ function Layout() {
                 {getLayout()}
             </div>
             <div className="body">
+
                 <Route 
                     path="/public_timeline" 
                     render={(props) => (
-                        <Timeline {...props} publicTimeline={true} userMessages={false} />
+                        <Timeline {...props} publicTimeline={true} userPage={false} />
                     )}
                 />
                 
                 <Route 
                     path="/timeline" 
                     render={(props) => (
-                        <Timeline {...props} publicTimeline={false} userMessages={false} />
+                        <Timeline {...props} publicTimeline={false} userMessages={false} userPage={false} />
                     )}
                 />
-
             <Switch>
                 <Route 
                     path="/login" 
@@ -98,7 +98,7 @@ function Layout() {
                 <Route path="/:username"
                     exact={true}
                     render={(props) => (
-                        <Timeline {...props} publicTimeline = {false} userMessages={true}/>
+                        <Timeline {...props} publicTimeline = {false} userMessages={true} userPage={true}/>
                     )}
                 />
                 
