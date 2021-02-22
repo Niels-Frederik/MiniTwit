@@ -203,7 +203,7 @@ app.post('/login', async (req,res) =>
                     httpOnly: false, // The cookie only accessible by the web server
 					signed: false, // Indicates if the cookie should be signed
                     //secure: true
-					domain: process.env.NODE_ENV === "development" ? null : "http://161.35.214.217"
+					//domain: process.env.NODE_ENV === "development" ? null : "http://161.35.214.217"
 					//domain: ""
                 }
 
