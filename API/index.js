@@ -114,7 +114,7 @@ app.post('/:username/follow', async (req,res) =>
 	}
 	const whomId = await getUserId(req.params.username)
 	if (whomId == null) 
-	{
+	{orton
 		res.sendStatus(404)
 		return
 	}
@@ -284,7 +284,7 @@ app.get('/:username', async (req,res) =>
 		const followed = await db.Followers.findOne({
 			where: {
 				who_id: userId,
-				whom_Id: whomId 
+				whom_id: whomId 
 			},
 			raw: true,
 			attributes:  ['whom_id']
