@@ -284,7 +284,7 @@ app.get('/:username', async (req,res) =>
 		const followed = await db.Followers.findOne({
 			where: {
 				who_id: userId,
-				whom_Id: whomId 
+				whom_id: whomId 
 			},
 			raw: true,
 			attributes:  ['whom_id']
