@@ -2,13 +2,14 @@ const { Sequelize, Model, DataTypes } = require('sequelize');
 const config = require('./config.json');
 const db = {};
 console.log(process.env.NODE_ENV)
-let sequelize = (process.env.NODE_ENV === 'development') ?
-    new Sequelize({
-       dialect: config.development.database.dialect,
-       storage: config.development.database.storage,
-       quoteIdentifiers: config.development.database.quoteIdentifiers
-       }
-    ): 
+console.log(process.env);
+let sequelize = //(process.env.NODE_ENV === 'development') ?
+//     new Sequelize({
+//        dialect: config.development.database.dialect,
+//        storage: config.development.database.storage,
+//        quoteIdentifiers: config.development.database.quoteIdentifiers
+//        }
+//     ): 
     new Sequelize
     ({
         username: process.env.DB_USERNAME,
@@ -23,7 +24,7 @@ let sequelize = (process.env.NODE_ENV === 'development') ?
             rejectUnauthorized: false
             }
         }
-    })
+    });
 
 const Users = sequelize.define('user', {
     user_id: {
