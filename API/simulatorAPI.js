@@ -4,7 +4,7 @@ const db = require('./entities');
 const { Sequelize } = require('sequelize');
 
 const app = express();
-const port = 5000;
+const port = 5001;
 
 app.use(express.json())
 
