@@ -10,7 +10,7 @@ services:
     ports:
       - "5000:5000"
 
-    frontend:
-      image: nieb/frontend
-      ports:
-        - "3000:80"
+  frontend:
+    image: nieb/frontend
+    ports:
+      - "3000:80"
