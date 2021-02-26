@@ -1,5 +1,6 @@
 const express = require("express");
 const { Op } = require('sequelize');
+const dotenv = require('dotenv').config();
 const db = require('./entities');
 const { Sequelize } = require('sequelize');
 
