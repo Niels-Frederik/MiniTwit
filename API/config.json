@@ -1,9 +1,19 @@
 {
-    "database": {
-        "development" : {
+    "development" : {
+        "database":
+        {
             "dialect": "sqlite",
             "storage": "../tmp/minitwit.db",
             "quoteIdentifiers": false
         }
+    },
+
+    "production" : {
+        "database":
+        {
+            "dialect" : "postgres",
+            "storage" : ""
+        }
+
     }
 }

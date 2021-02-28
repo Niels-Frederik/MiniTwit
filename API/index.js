@@ -1,6 +1,4 @@
 const express = require("express");
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv').config();
 const jwt = require('jsonwebtoken');
@@ -14,7 +12,7 @@ const app = express();
 const port = 5000;
 app.use(cookie_parser())
 app.use(express.json())
-app.use(cors())
+app.use(cors({ origin: true, credentials: true }))
 
 //Shows a users timeline or if no user is logged in it will
 //redirect to the public timeline.  This timeline shows the user's
@@ -26,10 +24,16 @@ app.get('/', async (req, res) => {
     else res.redirect("timeline");
 })
 
+
 app.get('/timeline', async(req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
-    if (userId == null) res.redirect("public");
+	if (userId == null) 
+	{
+		//res.send()
+		res.redirect('public_timeline');
+		return
+	}
 	const PER_PAGE = 30;
 	const followedId = await db.Followers.findAll({
 		where: {
@@ -67,7 +71,9 @@ app.get('/timeline', async(req,res) =>
     //res.setHeader("")
     //res.header("Access-Control-Allow-Origin", "*");
     //res.status(200).send(JSON.stringify(result))
-    res.send(result)
+
+	const obj = {"messages": result, "followedOptions": -1}
+    res.send(obj)
 })
   
 //Displays the latest messages of all users
@@ -91,7 +97,10 @@ app.get('/public_timeline', async (req,res) =>
 		attributes: ['user.username', 'text', 'pub_date'],
 		limit: PER_PAGE
 	})
-    res.send(result);
+
+	const obj = {"messages": result, "followedOptions": -1}
+
+    res.send(obj);
     //return;
 })
 
@@ -106,10 +115,11 @@ app.post('/:username/follow', async (req,res) =>
 	}
 	const whomId = await getUserId(req.params.username)
 	if (whomId == null) 
-	{
+	{orton
 		res.sendStatus(404)
 		return
 	}
+	console.log(userId)
 	await db.Followers.create({
 		who_id: userId,
 		whom_id: whomId
@@ -146,7 +156,7 @@ app.post('/add_message', async (req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
     const text = req.body.text;
-    if (userId == null || text == '') {
+    if (userId == null || text == '' || text == null) {
         res.sendStatus(400);
         return;
     } else {
@@ -161,7 +171,7 @@ app.post('/add_message', async (req,res) =>
     }
 })
 
-app.get('/login', async (req,res) =>
+app.post('/login', async (req,res) =>
 {
     const username = req.body.username
     const password = req.body.password
@@ -184,15 +194,17 @@ app.get('/login', async (req,res) =>
     {
         await bcrypt.compare(password, row.pw_hash, function(err, row)
         {
-            console.log(row)
             if (row)
             {
                 const user = {username: username}
                 const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
 
                 let options = {
-                    httpOnly: true, // The cookie only accessible by the web server
-                    signed: false // Indicates if the cookie should be signed
+                    httpOnly: false, // The cookie only accessible by the web server
+					signed: false, // Indicates if the cookie should be signed
+                    //secure: true
+					//domain: process.env.NODE_ENV === "development" ? null : "http://161.35.214.217"
+					//domain: ""
                 }
 
                 res.cookie('accessToken', accessToken, options)
@@ -244,13 +256,17 @@ app.post('/register', async (req,res) =>
     
 app.get('/logout', (req,res) =>
 {
-    res.redirect('/public_timeline');
+	res.clearCookie('accessToken')
+	res.redirect('/public_timeline');
+	return
 })
 
 app.get('/:username', async (req,res) =>
 {
-    const userId = await getUserId(req.params.username)
-    if (userId == null) 
+    const whomId = await getUserId(req.params.username)
+	const userId = await getUserIdFromJwtToken(req)
+
+    if (whomId == null) 
     {
         res.sendStatus(400)
         return
@@ -258,12 +274,47 @@ app.get('/:username', async (req,res) =>
 
 	const messages = await db.Messages.findAll({
 		where: {
-			author_id: author_id
+			author_id: whomId
+		},
+		attributes: ["text", "pub_date"]
+	});
+
+
+    if (messages) {
+
+		var m = []
+
+		const followed = await db.Followers.findOne({
+			where: {
+				who_id: userId,
+				whom_id: whomId 
+			},
+			raw: true,
+			attributes:  ['whom_id']
+		})
+
+		followedOptions = 0
+		if (whomId == userId) followedOptions = 0
+		else if (followed) followedOptions = 1
+		else followedOptions = 2
+
+		messages.forEach(element => 
+		{
+			m.push(
+			{
+				"username": req.params.username,
+				"text": element.dataValues.text,
+				"pub_date" : element.dataValues.pub_date,
+			})
+		})
+
+		const obj = 
+		{
+			"messages":m,
+			"followedOptions": followedOptions
 		}
 
-	});
-    if (messages) {
-        res.json(messages).send;
+        res.json(obj).send;
     } else {
         res.sendStatus(400);
         return
@@ -273,8 +324,8 @@ app.get('/:username', async (req,res) =>
 
 async function getUserIdFromJwtToken(req)
 {
-    const token = req.cookies.accessToken
-    if (token == null) return null
+	const token = req.cookies.accessToken
+    if (token == null || token == undefined) return null
 
     try 
     {
@@ -287,12 +338,6 @@ async function getUserIdFromJwtToken(req)
     }
 }
 
-
-app.listen(port, () => {
-    console.log(`app listening at http://localhost:${port}`)
-})
-
-
 async function getUserId(username)
 {
 	const user = await db.Users.findOne({
@@ -303,3 +348,7 @@ async function getUserId(username)
 	if (user) return user.user_id
 	return null;
 }
+
+app.listen(port, () => {
+    console.log(`app listening at http://localhost:${port}`)
+})

@@ -1,13 +1,30 @@
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const config = require('./config.json');
 const db = {};
-
-const sequelize = new Sequelize({
-    dialect: config.database.development.dialect,
-    storage: config.database.development.storage,
-    quoteIdentifiers: config.database.development.quoteIdentifiers
-    }
-);
+console.log(process.env.NODE_ENV)
+console.log(process.env)
+let sequelize = (process.env.NODE_ENV === 'development') ?
+    new Sequelize({
+       dialect: config.development.database.dialect,
+       storage: config.development.database.storage,
+       quoteIdentifiers: config.development.database.quoteIdentifiers
+       }
+    ): 
+    new Sequelize
+    ({
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        host: process.env.DB_HOST,
+        database: process.env.DB_NAME,
+        port: process.env.DB_PORT,
+        dialect: 'postgres',
+        dialectOptions: {
+            ssl: {
+            require: true,
+            rejectUnauthorized: false
+            }
+        }
+    })
 
 const Users = sequelize.define('user', {
     user_id: {
@@ -37,21 +54,19 @@ const Users = sequelize.define('user', {
 const Followers = sequelize.define('follower', {
     who_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         references: {
             model: Users,
             key: 'user_id'
         },
-		primaryKey: true
+			primaryKey: true
     },
     whom_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         references: {
             model: Users,
             key: 'user_id'
         },
-		primaryKey: true
+			primaryKey: true
     }
 },
 {
@@ -88,10 +103,11 @@ const Messages = sequelize.define('message', {
 
 });
 
-//Users.hasMany(Messages, {foreignKey: 'author_id'})
-Messages.belongsTo(Users, {foreignKey: 'author_id'})
-Followers.belongsTo(Users, {foreignKey: 'who_id'})
-Followers.belongsTo(Users, {foreignKey: 'whom_id'})
+Messages.belongsTo(Users, {foreignKey: 'author_id'});
+// Users.belongsToMany(Users, {through: Followers, as: 'who'});
+// Users.belongsToMany(Users, {through: Followers, as: 'whom'});
+Followers.belongsTo(Users, {as: 'who', foreignKey: 'who_id'}); // When including, use 'as: "who"', to include the who User
+Followers.belongsTo(Users, {as: 'whom', foreignKey: 'whom_id'}); // When including, use 'as: "whom"', to include the whom User
 
 db.Users = Users;
 db.Followers = Followers;

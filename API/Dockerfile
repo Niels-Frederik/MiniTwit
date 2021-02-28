@@ -1,0 +1,16 @@
+FROM node:15
+# WORKDIR /usr/src/app
+WORKDIR /app
+
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
+RUN npm install -production
+
+COPY . .
+ENV NODE_ENV=production
+
+# EXPOSE 5000
+
+CMD ["node", "index.js"]
+
+
