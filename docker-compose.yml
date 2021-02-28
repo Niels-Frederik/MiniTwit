@@ -7,8 +7,6 @@ services:
       dockerfile: Dockerfile_simulator_api # As the sim_api Dockerfile is not named Dockerfile, we need to specify it.
     ports: 
       - "5001:5001"
-    networks: 
-      - backend
       
   api:
     image: nieb/api
@@ -17,7 +15,7 @@ services:
     ports:
       - "5000:5000"
     networks: 
-      - backend
+      - local
 
   frontend:
     image: nieb/frontend
@@ -28,9 +26,7 @@ services:
     depends_on: 
       - api
     networks: 
-      - backend
-      - frontend
+      - local
 
 networks: 
-  frontend:
-  backend:
+  local:
