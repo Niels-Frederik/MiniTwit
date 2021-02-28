@@ -2,15 +2,35 @@ version: '3'
 services:
   sim-api:
     image: nieb/sim-api
+    build:
+      context: ./API
+      dockerfile: Dockerfile_simulator_api # As the sim_api Dockerfile is not named Dockerfile, we need to specify it.
     ports: 
       - "5001:5001"
+    networks: 
+      - backend
       
   api:
     image: nieb/api
+    build:
+      context: ./API #Loads the Dockerfile from the given directory
     ports:
       - "5000:5000"
+    networks: 
+      - backend
 
   frontend:
     image: nieb/frontend
+    build:
+      context: ./Frontend #Loads the Dockerfile from the given directory
     ports:
       - "3000:80"
+    depends_on: 
+      - api
+    networks: 
+      - backend
+      - frontend
+
+networks: 
+  frontend:
+  backend:

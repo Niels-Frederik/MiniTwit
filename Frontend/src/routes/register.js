@@ -2,6 +2,7 @@ import './layout.css';
 import React, { useState } from 'react';
 import axios from "axios";
 import { Redirect } from 'react-router-dom'
+import {API_BASE_PATH} from '../constants';
 
 function Register() {
     const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -13,7 +14,7 @@ function Register() {
         e.preventDefault();
         await axios({
             method: 'post',
-            url: 'http://localhost:5000/register',
+            url: API_BASE_PATH + '/register',
             data: {
                 username: username,
                 email: email,

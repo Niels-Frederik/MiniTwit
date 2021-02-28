@@ -3,6 +3,7 @@ import Message from '../components/message'
 import axios from "axios"
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import {API_BASE_PATH} from '../constants';
 
 
  function Timeline({ publicTimeline, userMessages }) {
@@ -15,9 +16,9 @@ import { useParams } from 'react-router-dom';
     useEffect(() => {
         const getTimeline = async () => {
             let url = "";
-            if (userMessages) url = "http://localhost:5000/" + username;
-            else if (publicTimeline) url = "http://localhost:5000/public_timeline";
-            else url = "http://localhost:5000/timeline";
+            if (userMessages) url = API_BASE_PATH() + "/" + username;
+            else if (publicTimeline) url = API_BASE_PATH() + "/public_timeline";
+            else url = API_BASE_PATH() + "/timeline";
             const res = await axios({
                     method: 'get',
                     url: url,
@@ -41,7 +42,7 @@ import { useParams } from 'react-router-dom';
 		}
 		const res = await axios({
 			method: "post",
-			url: "http://localhost:5000/add_message",
+			url: API_BASE_PATH() + "/add_message",
 			credentials: 'include',
 			withCredentials: true,
 			data: body,
@@ -60,7 +61,7 @@ import { useParams } from 'react-router-dom';
         console.log(userToFollow)
         const res = await axios({
             method: "post",
-			url: "http://localhost:5000/" + userToFollow + "/follow",
+			url: API_BASE_PATH() + "/" + userToFollow + "/follow",
 			credentials: 'include',
 			withCredentials: true,
         })
@@ -72,7 +73,7 @@ import { useParams } from 'react-router-dom';
         console.log(userToFollow)
         const res = await axios({
             method: "delete",
-			url: "http://localhost:5000/" + userToFollow + "/unfollow",
+			url: API_BASE_PATH() + "/" + userToFollow + "/unfollow",
 			credentials: 'include',
 			withCredentials: true,
         })

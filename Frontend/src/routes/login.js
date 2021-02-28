@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import axios from "axios";
 import { Redirect} from 'react-router-dom'
 import Layout from './layout';
+import {API_BASE_PATH} from '../constants';
 
 function Login({ setLoggedIn }) {
     const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -13,7 +14,7 @@ function Login({ setLoggedIn }) {
         e.preventDefault();
         await axios({
             method: 'post',
-            url: 'http://localhost:5000/login',
+            url: API_BASE_PATH() + '/login',
             credentials: 'include',
             withCredentials: true,
             data: {
