@@ -155,12 +155,12 @@ app.get('/msgs/:username', async (req, res) =>
 app.post('/msgs/:username', async (req, res) => 
 {
     updateLatest(req);
-    console.log(req);
+    console.log("Recieved a Post to /msgs/:username. Json body: " + req.body);
 
     notFromSim = notReqFromSimulator(req);
     if (notFromSim) req.json(notFromSim);
 
-    const text = req.body.text;
+    const text = req.body.content;
     const userid = await getUserId(req.params.username);
     if (userid == null || text == '') {
         res.sendStatus(400);
