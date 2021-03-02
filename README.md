@@ -1,9 +1,7 @@
 # MiniTwit
 
-Release 1.0
+Release 2.0
 -----------
-* Upgraded from python2 to python3
-* Reworked control.sh script
-* Created requirements.txt (use "pip install -r requirements.txt")
-* Setup git version control
-* Fixed typo in '/username' endpoint
+* Refactored MiniTwit to use Node.js with Express server and ORM for the database
+* Created the simulator api
+* Setup docker files and docker compose to run the frontend, backend, and simulator api
