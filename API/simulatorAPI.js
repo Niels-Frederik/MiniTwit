@@ -155,7 +155,7 @@ app.get('/msgs/:username', async (req, res) =>
 app.post('/msgs/:username', async (req, res) => 
 {
     updateLatest(req);
-    console.log("Recieved a Post to /msgs/:username. Json body: " + req.body);
+    console.log("Recieved a Post to /msgs/:username with username: " + req.params.username);
 
     notFromSim = notReqFromSimulator(req);
     if (notFromSim) req.json(notFromSim);
@@ -163,6 +163,7 @@ app.post('/msgs/:username', async (req, res) =>
     const text = req.body.content;
     const userid = await getUserId(req.params.username);
     if (userid == null || text == '') {
+        console.log("   - Post failed: " + (userid == null? "user does not exist" : "message is empty: " + text))
         res.sendStatus(400);
         return;
     } 
