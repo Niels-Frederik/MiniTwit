@@ -43,7 +43,7 @@ app.get('/latest', async (req, res) => {
 
 app.post('/register', async (req,res) => 
 {
-    update_latest(req);
+    updateLatest(req);
 
     const {username, email, pwd} = req.body;
     const userid = await getUserId(username);
