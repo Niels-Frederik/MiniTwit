@@ -155,6 +155,7 @@ app.get('/msgs/:username', async (req, res) =>
 app.post('/msgs/:username', async (req, res) => 
 {
     updateLatest(req);
+    console.log(req);
 
     notFromSim = notReqFromSimulator(req);
     if (notFromSim) req.json(notFromSim);
