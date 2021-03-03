@@ -25,7 +25,7 @@ services:
       - local
 
   watchtower:
-    image: v2tech/whatchtower
+    image: v2tec/whatchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/snap/docker/796/.docker/config.json:/config.json
