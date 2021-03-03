@@ -28,6 +28,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: minitwit/frontend
           dockerfile: Frontend/Dockerfile
+          context: ./Frontend
           tags: latest
           
   build_and_deploy_api:
@@ -42,7 +43,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: minitwit/api
-          dockerfile: API/Dockerfile
+          dockerfile: ./API/Dockerfile
+          context: ./API
           tags: latest
           
   build_and_deploy_simulator:
@@ -57,5 +59,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: minitwit/simulator
-          dockerfile: API/Dockerfile_simulator_api
+          dockerfile: ./API/Dockerfile_simulator_api
+          context: ./API
           tags: latest
