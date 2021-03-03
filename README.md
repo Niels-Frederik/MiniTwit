@@ -6,3 +6,4 @@ Release 2.0
 * Created the simulator api
 * Setup docker files and docker compose to run the frontend, backend, and simulator api
 * slet det her
+* slet her ogsa
