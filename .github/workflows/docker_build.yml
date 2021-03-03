@@ -35,7 +35,7 @@ jobs:
           context: ./Frontend
           push: true
           tags: minitwit/frontend:latest
-          build-args: ACCESS_TOKEN_SECRET=${{secret.ACCESS_TOKEN_SECRET}}, DB_HOST=${{secret.DB_HOST}}, DB_USERNAME=${{secret.DB_USERNAME}}, DB_PASSWORD=${{secret.DB_PASSWORD}}, DB_NAME=${{secret.DB_NAME}}, DB_PORT=${{secret.DB_PORT}}
+          build-args: ACCESS_TOKEN_SECRET=${{secrets.ACCESS_TOKEN_SECRET}}, DB_HOST=${{secrets.DB_HOST}}, DB_USERNAME=${{secrets.DB_USERNAME}}, DB_PASSWORD=${{secrets.DB_PASSWORD}}, DB_NAME=${{secrets.DB_NAME}}, DB_PORT=${{secrets.DB_PORT}}
           
   build_and_deploy_api:
     name: Build and Deploy Api
@@ -57,7 +57,7 @@ jobs:
           context: ./API
           push: true
           tags: minitwit/api:latest
-          build-args: ACCESS_TOKEN_SECRET=${{secret.ACCESS_TOKEN_SECRET}}, DB_HOST=${{secret.DB_HOST}}, DB_USERNAME=${{secret.DB_USERNAME}}, DB_PASSWORD=${{secret.DB_PASSWORD}}, DB_NAME=${{secret.DB_NAME}}, DB_PORT=${{secret.DB_PORT}}
+          build-args: ACCESS_TOKEN_SECRET=${{secrets.ACCESS_TOKEN_SECRET}}, DB_HOST=${{secrets.DB_HOST}}, DB_USERNAME=${{secrets.DB_USERNAME}}, DB_PASSWORD=${{secrets.DB_PASSWORD}}, DB_NAME=${{secrets.DB_NAME}}, DB_PORT=${{secrets.DB_PORT}}
           
   build_and_deploy_simulator:
     name: Build and Deploy Simulator
@@ -79,5 +79,5 @@ jobs:
           context: ./API
           push: true
           tags: minitwit/simulator:latest
-          build-args: ACCESS_TOKEN_SECRET=${{secret.ACCESS_TOKEN_SECRET}}, DB_HOST=${{secret.DB_HOST}}, DB_USERNAME=${{secret.DB_USERNAME}}, DB_PASSWORD=${{secret.DB_PASSWORD}}, DB_NAME=${{secret.DB_NAME}}, DB_PORT=${{secret.DB_PORT}}
+          build-args: ACCESS_TOKEN_SECRET=${{secrets.ACCESS_TOKEN_SECRET}}, DB_HOST=${{secrets.DB_HOST}}, DB_USERNAME=${{secrets.DB_USERNAME}}, DB_PASSWORD=${{secrets.DB_PASSWORD}}, DB_NAME=${{secrets.DB_NAME}}, DB_PORT=${{secrets.DB_PORT}}
 
