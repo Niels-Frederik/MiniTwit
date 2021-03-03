@@ -2,6 +2,13 @@ FROM node:15
 # WORKDIR /usr/src/app
 WORKDIR /app
 
+ARG ACCESS_TOKEN_SECRET
+ARG DB_HOST
+ARG DB_USERNAME
+ARG DB_PASSWORD
+ARG DB_NAME
+ARG DB_PORT
+
 COPY package.json /app/package.json
 COPY package-lock.json /app/package-lock.json
 RUN npm install -production
@@ -9,6 +16,12 @@ RUN npm install -production
 COPY . .
 RUN ls -l
 ENV NODE_ENV=production
+ENV ACCESS_TOKEN_SECRET=ACCESS_TOKEN_SECRET
+ENV DB_HOST=DB_HOST
+ENV DB_USERNAME=DB_USERNAME
+ENV DB_PASSWORD=DB_PASSWORD
+ENV DB_NAME=DB_NAME
+ENV DB_PORT=DB_PORT
 
 # EXPOSE 5000
 
