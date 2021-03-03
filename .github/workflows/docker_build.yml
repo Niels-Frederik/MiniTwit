@@ -75,4 +75,6 @@ jobs:
         with:
           file: ./API/Dockerfile_simulator_api
           context: ./API
+          push: true
           tags: minitwit/simulator:latest
+
