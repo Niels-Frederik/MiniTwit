@@ -6,9 +6,11 @@ name: Build and Push
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ Develop ]
+    branches: 
+      - main
   pull_request:
-    branches: [ Develop ]
+    branches: 
+      - main
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -19,14 +21,20 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v1
+        
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: minitwit/frontend
-          dockerfile: Frontend/Dockerfile
-          tags: latest
+          
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          file: Frontend/Dockerfile
+          context: ./Frontend
+          push: true
+          tags: minitwit/frontend:latest
           
   build_and_deploy_api:
     name: Build and Deploy Api
@@ -34,14 +42,20 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v1
+        
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: minitwit/api
-          dockerfile: API/Dockerfile
-          tags: latest
+          
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          file: ./API/Dockerfile
+          context: ./API
+          push: true
+          tags: minitwit/api:latest
           
   build_and_deploy_simulator:
     name: Build and Deploy Simulator
@@ -49,11 +63,18 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-      - name: Push to Docker Hub
-        uses: docker/build-push-action@v1
+        
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: minitwit/simulator
-          dockerfile: API/Dockerfile_simulator_api
-          tags: latest
+          
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          file: ./API/Dockerfile_simulator_api
+          context: ./API
+          push: true
+          tags: minitwit/simulator:latest
+
