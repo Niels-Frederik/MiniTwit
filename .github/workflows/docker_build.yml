@@ -55,7 +55,7 @@ jobs:
           file: ./API/Dockerfile
           context: ./API
           push: true
-          tags: minitwit/api/latest
+          tags: minitwit/api:latest
           
   build_and_deploy_simulator:
     name: Build and Deploy Simulator
