@@ -38,12 +38,13 @@ function updateLatest(request) {
 
 app.get('/latest', async (req, res) => {
     res.json({"latest": LATEST});
+    return;
 });
 
 
 app.post('/register', async (req,res) => 
 {
-    update_latest(req);
+    updateLatest(req);
 
     const {username, email, pwd} = req.body;
     const userid = await getUserId(username);
@@ -63,8 +64,14 @@ app.post('/register', async (req,res) =>
         });
     }
 
-    if(error) res.json({"status":400,"error_msg":error});
-    else res.sendStatus(204);
+    if(error) {
+        res.json({"status":400,"error_msg":error});
+        return;
+    }
+    else {
+        res.sendStatus(204);
+        return;
+    }
 
 
 });
@@ -105,7 +112,8 @@ app.get('/msgs', async (req, res) => {
         filteredMsgs.push(filteredMsg);
     });
     
-    res.send(filteredMsgs);    
+    res.send(filteredMsgs); 
+    return;   
 });
 
 app.get('/msgs/:username', async (req, res) => 
@@ -148,20 +156,26 @@ app.get('/msgs/:username', async (req, res) =>
         filteredMsgs.push(filteredMsg);
     });
 
-    res.json(filteredMsgs);    
+    res.json(filteredMsgs);  
+    return;  
     
 });
 
 app.post('/msgs/:username', async (req, res) => 
 {
     updateLatest(req);
+    console.log("Recieved a Post to /msgs/:username with username: " + req.params.username);
 
     notFromSim = notReqFromSimulator(req);
-    if (notFromSim) req.json(notFromSim);
+    if (notFromSim) {
+        req.json(notFromSim);
+        return;
+    } 
 
-    const text = req.body.text;
+    const text = req.body.content;
     const userid = await getUserId(req.params.username);
     if (userid == null || text == '') {
+        console.log("   - Post failed: " + (userid == null? "user does not exist" : "message is empty: " + text))
         res.sendStatus(400);
         return;
     } 
@@ -173,7 +187,8 @@ app.post('/msgs/:username', async (req, res) =>
 			pub_date: date,
 			flagged: 0
 		})
-        res.sendStatus(204)
+        res.sendStatus(204);
+        return;
     }
 })
 
@@ -199,12 +214,14 @@ app.post('/fllws/:username', async(req, res) => {
         const userToFollowId = await getUserId(req.body.follow);
         if (userToFollowId == null) {
             res.sendStatus(404, "Invalid user to follow");
+            return;
         }
         await db.Followers.create({
             who_id: userId,
             whom_id: userToFollowId
         });
-        res.status(200).send("You are now following " + req.body.follow)
+        res.status(200).send("You are now following " + req.body.follow);
+        return;
     }
     
     if (Object.keys(req.body).indexOf('unfollow') !== -1) { //if we should unfollow the given user
@@ -218,7 +235,8 @@ app.post('/fllws/:username', async(req, res) => {
                 whom_id: userToUnFollowId
             }
         });
-        res.status(200).send("You have unfollowed " + req.body.unfollow)
+        res.status(200).send("You have unfollowed " + req.body.unfollow);
+        return;
     }
 });
 
@@ -262,6 +280,7 @@ app.get('/fllws/:username', async(req, res) => {
         resultList.push(item['username']);
     });
     res.send({'followers': resultList});
+    return;
 }); 
 
 app.listen(port, () => {
