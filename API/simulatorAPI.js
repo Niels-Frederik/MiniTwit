@@ -228,6 +228,7 @@ app.post('/fllws/:username', async(req, res) => {
         const userToUnFollowId = await getUserId(req.body.unfollow);
         if (userToUnFollowId == null) {
             res.sendStatus(404, "Invalid user to unfollow");
+            //return
             return
         }
         await db.Followers.destroy({
