@@ -4,6 +4,7 @@ import axios from "axios";
 import { Redirect} from 'react-router-dom'
 import Layout from './layout';
 import {API_BASE_PATH} from '../constants';
+import auth from '../util/auth';
 
 function Login({ setLoggedIn }) {
     const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -24,6 +25,7 @@ function Login({ setLoggedIn }) {
         })
         .then(() => {
             setLoggedIn(true);
+            auth.login();
             setHasSubmitted(true);
         }, () => {
             alert('Wrong username or password');
