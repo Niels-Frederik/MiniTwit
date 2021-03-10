@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  sim-api:
+    container_name: sim-api
+    image: ./API/Dockerfile_simulator_api
+    ports: 
+      - "5001:5001"
+      
+  api:
+    container_name: api
+    image: ./API/Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - prometheus
+      - grafana
+    networks: 
+      - local
+
+  frontend:
+    container_name: frontend
+    image: ./frontend/Dockerfile
+    ports:
+      - "3000:80"
+    depends_on: 
+      - api
+      - grafana
+      - prometheus
+    networks: 
+      - local
+
+  watchtower:
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/snap/docker/796/.docker/config.json:/config.json
+    command: --interval 30
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - local
+
+
+  grafana:
+    image: grafana/grafana:4.5.2
+    ports:
+      - "3001:3000"
+    networks:
+      - local
+
+networks: 
+  local:
