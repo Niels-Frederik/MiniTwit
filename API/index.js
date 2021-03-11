@@ -7,7 +7,20 @@ const cors = require('cors')
 
 const { Op } = require('sequelize');
 const db = require('./entities');
-const prom = require('./prom-client');
+const prom = require('prom-client');
+//var defaultMetrics = prom.defaultMetrics;
+//const collectDefaultMetrics = prom.collectDefaultMetrics
+const registry = new prom.Registry();
+//const register = new Registry()
+/*
+collectDefaultMetrics({
+  register
+})
+*/
+
+//var interval = defaultMetrics;
+//clearInterval(interval);
+//prom.register.clear();
 
 const app = express();
 const port = 5000;
@@ -16,15 +29,20 @@ app.use(express.json())
 app.use(cors({ origin: true, credentials: true }))
 app.use(myMiddleware)
 
-const RESPONSE_COUNTER = new prom.Counter({
+const response_counter = new prom.Counter({
   name: 'minitwit_total_responses',
   help: 'metric_help',
+  registers: [registry],
 });
+//prom.register.response_counter
+registry.registerMetric(response_counter)
 
-function myMiddleware(req, res, next) {
-  RESPONSE_COUNTER.inc();
-  console.log('Det her er vores request counter: ' + RESPONSE_COUNTER)
-  //Increment total requests
+
+async function myMiddleware(req, res, next) {
+  response_counter.inc();
+  //const count = await response_counter.get()
+  //console.log('Det her er vores request counter: ' + JSON.stringify(count))
+  console.log(await registry.metrics())
   next()
 }
 

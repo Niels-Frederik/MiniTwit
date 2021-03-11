@@ -1,0 +1,15 @@
+FROM node:15 as builder
+ENV NODE_ENV=development
+WORKDIR /app 
+
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm install -production
+
+COPY . .
+#RUN npm run build
+RUN npm start
+
+# EXPOSE 80
+# CMD ["nginx", "-g", "daemon off;"]
+

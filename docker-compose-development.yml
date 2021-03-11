@@ -1,22 +1,12 @@
 version: '3'
 
 services:
-  sim-api:
-    container_name: sim-api
-    #build: ./SimulatorAPI/.
-    build:
-      context: ./API
-      dockerfile: Dockerfile_simulator_api
-    #image: ./api/dockerfile_simulator_api
-    ports: 
-      - "5001:5001"
-      
   api:
     container_name: api
     #build: ./API/.
     build:
       context: ./API
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-development
     #image: ./api/dockerfile
     ports:
       - "5000:5000"
@@ -27,8 +17,11 @@ services:
       - local
 
   frontend:
-    container_name: frontend
-    build: ./Frontend/.
+    container_name: frontend-development
+    #build: ./Frontend/.
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile-development
     #image: ./frontend/dockerfile
     ports:
       - "3000:80"
@@ -38,13 +31,6 @@ services:
       - prometheus
     networks: 
       - local
-
-  watchtower:
-    image: v2tec/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /root/snap/docker/796/.docker/config.json:/config.json
-    command: --interval 30
 
   prometheus:
     image: prom/prometheus
