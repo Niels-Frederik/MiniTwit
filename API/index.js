@@ -8,19 +8,7 @@ const cors = require('cors')
 const { Op } = require('sequelize');
 const db = require('./entities');
 const prom = require('prom-client');
-//var defaultMetrics = prom.defaultMetrics;
-//const collectDefaultMetrics = prom.collectDefaultMetrics
-const registry = new prom.Registry();
-//const register = new Registry()
-/*
-collectDefaultMetrics({
-  register
-})
-*/
-
-//var interval = defaultMetrics;
-//clearInterval(interval);
-//prom.register.clear();
+const register = new prom.Registry();
 
 const app = express();
 const port = 5000;
@@ -29,23 +17,34 @@ app.use(express.json())
 app.use(cors({ origin: true, credentials: true }))
 app.use(myMiddleware)
 
-const response_counter = new prom.Counter({
+register.setDefaultLabels({
+  app: 'minitwit'
+})
+prom.collectDefaultMetrics({ register })
+
+const request_counter = new prom.Counter({
   name: 'minitwit_total_responses',
   help: 'metric_help',
-  registers: [registry],
+  registers: [register],
 });
-//prom.register.response_counter
-registry.registerMetric(response_counter)
+register.registerMetric(request_counter)
+
+//const AggregatorRegistry = prom.AggregatorRegistry
+//AggregatorRegistry.setRegistries(register);
 
 
-async function myMiddleware(req, res, next) {
-  response_counter.inc();
+function myMiddleware(req, res, next) {
+  request_counter.inc();
   //const count = await response_counter.get()
   //console.log('Det her er vores request counter: ' + JSON.stringify(count))
-  console.log(await registry.metrics())
   next()
 }
 
+app.get('/metrics', async(req, res) =>
+{
+	res.setHeader('Content-Type', register.contentType)
+	res.end(await register.metrics())
+})
 
 //Shows a users timeline or if no user is logged in it will
 //redirect to the public timeline.  This timeline shows the user's
