@@ -3,13 +3,21 @@ version: '3'
 services:
   sim-api:
     container_name: sim-api
-    image: ./API/Dockerfile_simulator_api
+    #build: ./SimulatorAPI/.
+    build:
+      context: ./API
+      dockerfile: Dockerfile_simulator_api
+    #image: ./api/dockerfile_simulator_api
     ports: 
       - "5001:5001"
       
   api:
     container_name: api
-    image: ./API/Dockerfile
+    #build: ./API/.
+    build:
+      context: ./API
+      dockerfile: Dockerfile
+    #image: ./api/dockerfile
     ports:
       - "5000:5000"
     depends_on:
@@ -20,7 +28,8 @@ services:
 
   frontend:
     container_name: frontend
-    image: ./frontend/Dockerfile
+    build: ./Frontend/.
+    #image: ./frontend/dockerfile
     ports:
       - "3000:80"
     depends_on: 
