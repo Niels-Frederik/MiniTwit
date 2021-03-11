@@ -1,5 +1,5 @@
 FROM node:15 as builder
-ENV NODE_ENV=production
+ENV REACT_APP_ENV=production
 WORKDIR /app 
 
 COPY package.json ./
