@@ -3,11 +3,9 @@ version: '3'
 services:
   api:
     container_name: api
-    #build: ./API/.
     build:
       context: ./API
       dockerfile: Dockerfile-development
-    #image: ./api/dockerfile
     ports:
       - "5000:5000"
     depends_on:
@@ -18,11 +16,9 @@ services:
 
   frontend:
     container_name: frontend-development
-    #build: ./Frontend/.
     build:
       context: ./Frontend
       dockerfile: Dockerfile-development
-    #image: ./frontend/dockerfile
     ports:
       - "3000:80"
     depends_on: 
@@ -42,9 +38,11 @@ services:
     networks:
       - local
 
-
   grafana:
     image: grafana/grafana:4.5.2
+    container_name: grafana
+    volumes:
+      - grafana-storage:/var/lib/grafana
     ports:
       - "3001:3000"
     networks:
@@ -52,3 +50,6 @@ services:
 
 networks: 
   local:
+
+volumes:
+  grafana-storage:

@@ -50,6 +50,9 @@ services:
 
   grafana:
     image: grafana/grafana:4.5.2
+    container_name: grafana
+    volumes:
+      - grafana-storage:/var/lib/grafana
     ports:
       - "3001:3000"
     networks:
@@ -57,3 +60,6 @@ services:
 
 networks: 
   local:
+
+volumes:
+  grafana-storage:
