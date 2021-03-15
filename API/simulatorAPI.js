@@ -4,6 +4,7 @@ const dotenv = require('dotenv').config();
 const db = require('./entities');
 const prom = require('prom-client');
 const { Sequelize } = require('sequelize');
+const url = require('url')
 
 const register = new prom.Registry();
 
@@ -60,18 +61,22 @@ const server_error_response_counter = new prom.Counter({
 });
 
 function beforeMiddleware(req, res, next) {
-  request_counter.inc();
+  const route = url.parse(req.url).pathname
+  if(route !== '/metrics') request_counter.inc();
+  
   next()
 }
 
 function afterMiddleware(req, res, next) {
-  console.log(res.statusCode)
-  const response = res.statusCode.toString()
-  if (response[0] =='1') information_response_counter.inc()
-  else if(response[0] == '2') success_response_counter.inc()
-  else if (response[0] == '3') redirect_response_counter.inc()
-  else if (response[0] == '4') client_error_response_counter.inc()
-  else if (response[0] == '5') server_error_response_counter.inc()
+  const route = url.parse(req.url).pathname
+  if(route !== '/metrics') {
+	const response = res.statusCode.toString()
+	if (response[0] =='1') information_response_counter.inc()
+	else if(response[0] == '2') success_response_counter.inc()
+	else if (response[0] == '3') redirect_response_counter.inc()
+	else if (response[0] == '4') client_error_response_counter.inc()
+	else if (response[0] == '5') server_error_response_counter.inc()
+  }
 }
 
 app.get('/metrics', async(req, res, next) =>
@@ -87,7 +92,7 @@ function notReqFromSimulator(req){
     const fromSimulator = req.header('Authorization');
     if(fromSimulator != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh") {
         const error = "You are not authorized to use this resource!";
-        return { "status": 403, "error_msg": error}
+        return [403, error]
     }
 }
 
@@ -138,7 +143,7 @@ app.post('/register', async (req,res, next) =>
     }
 
     if(error) {
-        res.json({"status":400,"error_msg":error});
+		res.status(400).send(error)
 		next()
         return;
     }
@@ -156,7 +161,7 @@ app.get('/msgs', async (req, res, next) => {
 
     notFromSim = notReqFromSimulator(req);
     if (notFromSim) {
-        res.send(notFromSim);
+		res.status(notFromSim[0]).send(notFromSim[1])
 		next()
         return;
     }
@@ -198,7 +203,11 @@ app.get('/msgs/:username', async (req, res, next) =>
     updateLatest(req);
 
     notFromSim = notReqFromSimulator(req);
-    if (notFromSim) req.json(notFromSim);
+    if (notFromSim) {
+	  res.status(notFromSim[0]).send(notFromSim[1])
+	  next()
+	  return;
+	}
 
     const userid = await getUserId(req.params.username);
     if(!userid){ 
@@ -247,7 +256,7 @@ app.post('/msgs/:username', async (req, res, next) =>
 
     notFromSim = notReqFromSimulator(req);
     if (notFromSim) {
-        req.json(notFromSim);
+		res.status(notFromSim[0]).send(notFromSim[1])
 		next()
         return;
     } 
@@ -280,7 +289,7 @@ app.post('/fllws/:username', async(req, res, next) => {
     const notReqFromSim = notReqFromSimulator(req);
 
     if(notReqFromSim){
-        res.json(notReqFromSim);
+		res.status(notReqFromSim[0]).send(notReqFromSim[1])
 		next()
         return;
     }
@@ -297,7 +306,7 @@ app.post('/fllws/:username', async(req, res, next) => {
     if (Object.keys(req.body).indexOf('follow') !== -1) { //if we should follow the given user
         const userToFollowId = await getUserId(req.body.follow);
         if (userToFollowId == null) {
-            res.sendStatus(404, "Invalid user to follow");
+			res.status(404).send("Invalid user to follow");
 			next()
             return;
         }
@@ -336,7 +345,7 @@ app.get('/fllws/:username', async(req, res, next) => {
     const notReqFromSim = notReqFromSimulator(req);
 
     if(notReqFromSim){
-        res.json(notReqFromSim);
+		res.status(notReqFromSim[0]).send(notReqFromSim[1])
 		next()
         return;
     }
