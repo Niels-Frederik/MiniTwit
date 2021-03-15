@@ -32,7 +32,7 @@ app.get('/metric', async(req, res) =>
 {
   res.setHeader('Content-Type', register.contentType)
   res.end(await register.metrics())
-}
+})
 
 let LATEST = 0;
 
