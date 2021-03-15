@@ -44,6 +44,9 @@ services:
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    environment:
+      - GF_SECURITY_ADMIN_USER=devops21
+      - GF_SECURITY_ADMIN_PASSWORD=-lEtMEIn-
     ports:
       - "9090:9090"
     networks:
