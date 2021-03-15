@@ -35,13 +35,6 @@ jobs:
           context: ./Frontend
           push: true
           tags: minitwit/frontend_develop:latest
-          build-args: |
-            ACCESS_TOKEN_SECRET=${{secrets.ACCESS_TOKEN_SECRET}}
-            DB_HOST=${{secrets.DB_HOST}}
-            DB_USERNAME=${{secrets.DB_USERNAME}}
-            DB_PASSWORD=${{secrets.DB_PASSWORD}}
-            DB_NAME=${{secrets.DB_NAME_DEVELOP}}
-            DB_PORT=${{secrets.DB_PORT}}
           
   build_and_deploy_api:
     name: Build and Deploy Api
