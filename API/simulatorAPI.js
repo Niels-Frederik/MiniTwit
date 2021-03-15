@@ -3,11 +3,36 @@ const { Op } = require('sequelize');
 const dotenv = require('dotenv').config();
 const db = require('./entities');
 const { Sequelize } = require('sequelize');
+const register = new prom.Registry();
 
 const app = express();
 const port = 5001;
 
 app.use(express.json())
+app.use(myMiddleware)
+
+register.setDefaultLabels({
+  app: 'minitwit'
+})
+prom.collectDefaultMetrics({ register })
+
+const request_counter = new prom.Counter({
+  name: 'minitwit_total_requests',
+  help: 'metric_help',
+  registers: [register],
+});
+register.registerMetric(request_counter)
+
+function myMiddleWare(req, res, next) {
+  request_counter.inc();
+  next()
+}
+
+app.get('/metric', async(req, res) =>
+{
+  res.setHeader('Content-Type', register.contentType)
+  res.end(await register.metrics())
+}
 
 let LATEST = 0;
 
