@@ -9,12 +9,23 @@ function Register() {
     const [username, setUsername] = useState();
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
+    const [confirmPassword, setConfirmPassword] = useState();
+
+    function validatePassword(e){
+        if(e.target.value != password){
+            e.target.setCustomValidity("Passwords do not match");
+        }
+        else{
+            e.target.setCustomValidity("");
+        }
+    }
 
     async function submit (e){
         e.preventDefault();
+    
         await axios({
             method: 'post',
-            url: API_BASE_PATH + '/register',
+            url: API_BASE_PATH() + '/register',
             data: {
                 username: username,
                 email: email,
@@ -24,8 +35,14 @@ function Register() {
         .then(() => {
             alert ('Success');
             setHasSubmitted(true);
-        }, () => {
-            alert('Username already exists');
+        })
+        .catch((error) => { 
+            if(error.response.status == 400){
+                alert('Username already exists');
+            }
+            else{
+                alert('Error status code: ' + error.response.status);
+            }
         });
     }
 
@@ -39,7 +56,7 @@ function Register() {
                 </label>
                 <label>
                     Email:
-                    <input type="text" name="email" size="30" onChange={e => setEmail(e.target.value)} required/>
+                    <input type="email" name="email" size="30" onChange={e => setEmail(e.target.value)} required/>
                 </label>
                 <label>
                     Password:
@@ -47,7 +64,12 @@ function Register() {
                 </label>
                 <label>
                     Password (repeat):
-                    <input type="password" name="password2" size="30" required/>
+                    <input type="password" 
+                           name="password2" 
+                           size="30" 
+                           onChange={e => setConfirmPassword(e.target.value)} 
+                           onInput={e => validatePassword(e)}
+                           required/>
                 </label>
                 <div className="actions">
                     <input type="submit" value="Sign Up"/>
