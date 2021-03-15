@@ -2,7 +2,9 @@ const express = require("express");
 const { Op } = require('sequelize');
 const dotenv = require('dotenv').config();
 const db = require('./entities');
+const prom = require('prom-client');
 const { Sequelize } = require('sequelize');
+
 const register = new prom.Registry();
 
 const app = express();
