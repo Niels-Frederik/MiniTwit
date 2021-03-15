@@ -6,6 +6,8 @@ services:
     image: index.docker.io/minitwit/simulator
     ports: 
       - "5001:5001"
+    networks:
+      - local
       
   api:
     container_name: api

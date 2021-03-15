@@ -30,7 +30,7 @@ function myMiddleware(req, res, next) {
   next()
 }
 
-app.get('/metric', async(req, res) =>
+app.get('/metrics', async(req, res) =>
 {
   res.setHeader('Content-Type', register.contentType)
   res.end(await register.metrics())
