@@ -3,13 +3,7 @@ const config = require('./config.json');
 const db = {};
 console.log(process.env.NODE_ENV)
 console.log(process.env)
-let sequelize = (process.env.NODE_ENV === 'development') ?
-    new Sequelize({
-       dialect: config.development.database.dialect,
-       storage: config.development.database.storage,
-       quoteIdentifiers: config.development.database.quoteIdentifiers
-       }
-    ): 
+let sequelize = 
     new Sequelize
     ({
         username: process.env.DB_USERNAME,

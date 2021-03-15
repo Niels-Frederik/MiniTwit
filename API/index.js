@@ -7,12 +7,44 @@ const cors = require('cors')
 
 const { Op } = require('sequelize');
 const db = require('./entities');
+const prom = require('prom-client');
+const register = new prom.Registry();
 
 const app = express();
 const port = 5000;
 app.use(cookie_parser())
 app.use(express.json())
 app.use(cors({ origin: true, credentials: true }))
+app.use(myMiddleware)
+
+register.setDefaultLabels({
+  app: 'minitwit'
+})
+prom.collectDefaultMetrics({ register })
+
+const request_counter = new prom.Counter({
+  name: 'minitwit_total_responses',
+  help: 'metric_help',
+  registers: [register],
+});
+register.registerMetric(request_counter)
+
+//const AggregatorRegistry = prom.AggregatorRegistry
+//AggregatorRegistry.setRegistries(register);
+
+
+function myMiddleware(req, res, next) {
+  request_counter.inc();
+  //const count = await response_counter.get()
+  //console.log('Det her er vores request counter: ' + JSON.stringify(count))
+  next()
+}
+
+app.get('/metrics', async(req, res) =>
+{
+	res.setHeader('Content-Type', register.contentType)
+	res.end(await register.metrics())
+})
 
 //Shows a users timeline or if no user is logged in it will
 //redirect to the public timeline.  This timeline shows the user's
