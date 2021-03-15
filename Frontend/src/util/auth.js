@@ -1,13 +1,15 @@
 function login(){
-    window.localStorage.setItem("isLoggedIn", true);
+    document.cookie = 'loggedIn=True';
 }
 
 function logout(){
-    window.localStorage.setItem("isLoggedIn", false);
+    document.cookie = 'loggedIn=False';
 }
 
 function isLoggedIn(){
-    return JSON.parse(window.localStorage.getItem("isLoggedIn"));
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; loggedIn=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
 export default { login, logout, isLoggedIn};
