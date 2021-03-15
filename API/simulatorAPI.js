@@ -25,7 +25,7 @@ const request_counter = new prom.Counter({
 });
 register.registerMetric(request_counter)
 
-function myMiddleWare(req, res, next) {
+function myMiddleware(req, res, next) {
   request_counter.inc();
   next()
 }
