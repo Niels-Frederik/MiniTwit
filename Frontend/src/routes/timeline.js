@@ -58,7 +58,7 @@ import auth from '../util/auth';
 			withCredentials: true,
 			data: body,
 		})
-		window.location.reload(true)
+		window.location.reload(true);
 	}
 
 	function handleChange(e) {

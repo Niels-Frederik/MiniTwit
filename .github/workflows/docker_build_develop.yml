@@ -34,7 +34,7 @@ jobs:
           file: Frontend/Dockerfile
           context: ./Frontend
           push: true
-          tags: minitwit/frontend_latest:latest
+          tags: minitwit/frontend_develop:latest
           build-args: |
             ACCESS_TOKEN_SECRET=${{secrets.ACCESS_TOKEN_SECRET}}
             DB_HOST=${{secrets.DB_HOST}}
