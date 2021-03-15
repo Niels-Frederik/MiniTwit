@@ -8,3 +8,4 @@ Release 2.0
 * slet det her
 * slet her ogsa igen
 * slet her ogsaa
+test
