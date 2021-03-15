@@ -2,9 +2,9 @@ import './layout.css';
 import Message from '../components/message'
 import axios from "axios"
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import {API_BASE_PATH} from '../constants';
-
+import auth from '../util/auth';
 
  function Timeline({ publicTimeline, userMessages }) {
     const [messages, setMessages] = useState([])
@@ -12,6 +12,8 @@ import {API_BASE_PATH} from '../constants';
     let { username } = useParams();
 	const [value, setValue] = useState(0)
 	let text = ""
+
+    const history = useHistory();
 
     useEffect(() => {
         const getTimeline = async () => {
@@ -24,13 +26,22 @@ import {API_BASE_PATH} from '../constants';
                     url: url,
                     credentials: 'include',
                     withCredentials: true
-                }).then((res) =>
-                {
+                })
+                .then((res) =>{
                     console.log(res.data.messages);
                     setMessages(res.data.messages);
                     setFollowingOptions(res.data.followedOptions);
-                    
                 })
+                .catch((error) => { 
+                    if(error.response.status == 401){
+                        alert('Session expired, please login again.');
+                        history.push('/logout');
+                    }
+                    else{
+                        alert('Error status code: ' + error.response.status);
+                    }
+                });
+
         }
         getTimeline();
     }, [])
@@ -87,22 +98,30 @@ import {API_BASE_PATH} from '../constants';
     {
         if (userMessages)
         {
-            console.log(followingOptions)
-            switch(followingOptions)
-            {
-                case 0 : 
-                    return <div>
-                        <p>This is you!</p>
-                    </div>
-                case 1 : 
-                    return <div>
-                        <p>You are currently following this user <a href="#0" onClick={unFollowUser}> Unfollow this user</a></p>
+            if(!auth.isLoggedIn()){
+                return (
+                <div>
+                    <p>Please login to follow this user</p>
+                </div> 
+            )}
+            else{
+                switch(followingOptions)
+                {
+                    case 0 : 
+                        return <div>
+                            <p>This is you!</p>
                         </div>
-                case 2 : 
-                    return <div>
-                        <p>You are not yet following this user <a href="#0" onClick={followUser}> Follow this user</a></p>
-                    </div> 
+                    case 1 : 
+                        return <div>
+                            <p>You are currently following this user <a href="#0" onClick={unFollowUser}> Unfollow this user</a></p>
+                            </div>
+                    case 2 : 
+                        return <div>
+                            <p>You are not yet following this user <a href="#0" onClick={followUser}> Follow this user</a></p>
+                        </div> 
+                }
             }
+
         }
     }
 

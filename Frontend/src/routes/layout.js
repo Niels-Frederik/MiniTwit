@@ -6,24 +6,19 @@ import Timeline from './timeline'
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import cookies from "js-cookie";
-//import 
+import auth from '../util/auth';
 
 function Layout() {
     const history = useHistory();
-    const [loggedIn, setLoggedIn] = useState(false)
-
-    //var loggedIn = isLoggedIn()
+    const [loggedIn, setLoggedIn] = useState(auth.isLoggedIn())
+    console.log(loggedIn)
 
     useEffect(() => {
-        setLoggedIn(isLoggedIn())
-    // Update the document title using the browser API
-    //document.title = `You clicked ${count} times`;
-    //console.log("piklort")
+        setLoggedIn(auth.isLoggedIn());
     }, []);
 
     function getLayout()
     {
-        //console.log(cookies.get("accessToken"))
         if (loggedIn)
         {
             return(
@@ -40,8 +35,9 @@ function Layout() {
                             withCredentials: true
                         })
                         .then(() => {
-                            alert('Logged out');
+                            auth.logout();
                             setLoggedIn(false);
+                            alert('Logged out');
                             history.push('/public_timeline');
                         }, () => {
                             alert('Failed to log out');
@@ -89,7 +85,7 @@ function Layout() {
                 <Route 
                     path="/login" 
                     render={(props) => (
-                        <Login {...props} setLoggedIn = {setLoggedIn} />
+                        <Login {...props} setLoggedIn={setLoggedIn}/>
                     )}
                 />
 
@@ -116,13 +112,6 @@ function Layout() {
             </div>
         </div>
     );
-}
-
-function isLoggedIn()
-{
-    const cookie = cookies.get('accessToken')
-    if (cookie != undefined && cookie.length > 0) return true
-    else return false
 }
 
 export default Layout;

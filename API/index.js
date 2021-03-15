@@ -56,7 +56,6 @@ app.get('/', async (req, res) => {
     else res.redirect("timeline");
 })
 
-
 app.get('/timeline', async(req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
