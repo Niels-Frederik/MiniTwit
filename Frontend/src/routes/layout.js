@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import cookies from "js-cookie";
 import auth from '../util/auth';
+import {API_BASE_PATH} from '../constants';
 
 function Layout() {
     const history = useHistory();
@@ -30,7 +31,7 @@ function Layout() {
                     onClick={ async () => {
                         await axios({
                             method: 'get',
-                            url: 'http://localhost:5000/logout',
+                            url: API_BASE_PATH() + '/logout',
                             credentials: 'include',
                             withCredentials: true
                         })
