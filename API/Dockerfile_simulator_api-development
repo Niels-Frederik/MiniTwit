@@ -1,0 +1,12 @@
+From node:15
+WORKDIR /app
+
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
+RUN npm install -production
+
+COPY . .
+RUN ls -l
+ENV NODE_ENV=development
+
+CMD ["node", "simulatorAPI.js"]

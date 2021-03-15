@@ -44,9 +44,6 @@ services:
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    environment:
-      - GF_SECURITY_ADMIN_USER=devops21
-      - GF_SECURITY_ADMIN_PASSWORD=-lEtMEIn-
     ports:
       - "9090:9090"
     networks:
@@ -58,6 +55,9 @@ services:
     container_name: grafana
     volumes:
       - grafana-storage:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=devops21
+      - GF_SECURITY_ADMIN_PASSWORD=-lEtMEIn-
     ports:
       - "3001:3000"
     networks:
