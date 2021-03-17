@@ -2,68 +2,23 @@ const express = require("express");
 const { Op } = require('sequelize');
 const dotenv = require('dotenv').config();
 const db = require('./entities');
-const prom = require('prom-client');
 const { Sequelize } = require('sequelize');
 const url = require('url')
-
-const register = new prom.Registry();
+const prom = require('prom-client');
 
 const app = express();
 const port = 5001;
 
+const register = new prom.Registry();
+const Monitor = require('./monitoring')
+const monitoring = new Monitor.Monitoring(prom, register)
+
 app.use(express.json())
 app.use(beforeMiddleware)
 
-register.setDefaultLabels({
-  app: 'minitwit'
-})
-prom.collectDefaultMetrics({ register })
-
-const request_counter = new prom.Counter({
-  name: 'minitwit_total_requests',
-  help: 'metric_help',
-  registers: [register],
-});
-register.registerMetric(request_counter)
-
-const information_response_counter = new prom.Counter({
-  name: 'minitwit_information_response_counter',
-  help: 'metric_help',
-  registers: [register],
-});
-register.registerMetric(information_response_counter)
-
-const success_response_counter = new prom.Counter({
-  name: 'minitwit_successful_response_counter',
-  help: 'metric_help',
-  registers: [register],
-});
-register.registerMetric(success_response_counter)
-
-const redirect_response_counter = new prom.Counter({
-  name: 'minitwit_redirect_response_counter',
-  help: 'metric_help',
-  registers: [register],
-});
-register.registerMetric(redirect_response_counter)
-
-const client_error_response_counter = new prom.Counter({
-  name: 'minitwit_client_error_response_counter',
-  help: 'metric_help',
-  registers: [register],
-});
-register.registerMetric(client_error_response_counter)
-
-const server_error_response_counter = new prom.Counter({
-  name: 'minitwit_server_error_response_counter',
-  help: 'metric_help',
-  registers: [register],
-});
-
 function beforeMiddleware(req, res, next) {
   const route = url.parse(req.url).pathname
-  if(route !== '/metrics') request_counter.inc();
-  
+  if(route !== '/metrics') monitoring.request_counter.inc();
   next()
 }
 
@@ -71,11 +26,11 @@ function afterMiddleware(req, res, next) {
   const route = url.parse(req.url).pathname
   if(route !== '/metrics') {
 	const response = res.statusCode.toString()
-	if (response[0] =='1') information_response_counter.inc()
-	else if(response[0] == '2') success_response_counter.inc()
-	else if (response[0] == '3') redirect_response_counter.inc()
-	else if (response[0] == '4') client_error_response_counter.inc()
-	else if (response[0] == '5') server_error_response_counter.inc()
+	if (response[0] =='1') monitoring.information_response_counter.inc()
+	else if(response[0] == '2') monitoring.success_response_counter.inc()
+	else if (response[0] == '3') monitoring.redirect_response_counter.inc()
+	else if (response[0] == '4') monitoring.client_error_response_counter.inc()
+	else if (response[0] == '5') monitoring.server_error_response_counter.inc()
   }
 }
 
