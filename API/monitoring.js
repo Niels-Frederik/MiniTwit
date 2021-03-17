@@ -49,6 +49,27 @@ class Monitoring {
 	});
 	register.registerMetric(this.server_error_response_counter)
 
+
+	this.follow_request_counter = new prom.Counter({
+	  name: 'minitwit_follow_request_counter',
+	  help: 'metric_help',
+	  registers: [register],
+	});
+	register.registerMetric(this.follow_request_counter)
+
+	this.follow_success_counter = new prom.Counter({
+	  name: 'minitwit_follow_success_counter',
+	  help: 'metric_help',
+	  registers: [register],
+	});
+	register.registerMetric(this.follow_success_counter)
+
+	this.follow_failure_counter = new prom.Counter({
+	  name: 'minitwit_follow_failure_counter',
+	  help: 'metric_help',
+	  registers: [register],
+	});
+	register.registerMetric(this.follow_failure_counter)
   }
 }
 

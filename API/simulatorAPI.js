@@ -259,8 +259,10 @@ app.post('/fllws/:username', async(req, res, next) => {
     }
 
     if (Object.keys(req.body).indexOf('follow') !== -1) { //if we should follow the given user
+		Monitoring.follow_request_counter.inc()
         const userToFollowId = await getUserId(req.body.follow);
         if (userToFollowId == null) {
+			Monitoring.follow_failure_counter.inc()
 			res.status(404).send("Invalid user to follow");
 			next()
             return;
@@ -269,6 +271,7 @@ app.post('/fllws/:username', async(req, res, next) => {
             who_id: userId,
             whom_id: userToFollowId
         });
+		Monitoring.follow_success_counter.inc()
         res.status(200).send("You are now following " + req.body.follow);
 		next()
         return;
