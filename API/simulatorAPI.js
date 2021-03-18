@@ -262,9 +262,9 @@ app.post('/msgs/:username', async (req, res, next) =>
     const text = req.body.content;
     const userid = await getUserId(req.params.username);
     if (userid == null || text == '') {
-        console.log("   - Post failed: " + (userid == null? "user does not exist" : "message is empty: " + text))
+        console.log("   - Post failed: " + (userid == null? "user does not exist" : "message is empty: " + text));
         res.sendStatus(400);
-		next()
+		next();
         return;
     } 
     else {
@@ -276,53 +276,65 @@ app.post('/msgs/:username', async (req, res, next) =>
 			flagged: 0
 		})
         res.sendStatus(204);
-		next()
+		next();
         return;
     }
 })
 
 app.post('/fllws/:username', async(req, res, next) => {
     updateLatest(req);
+    console.log("Recieved a Post follow request:");
+    console.log("request body: ", req.body);
+    console.log("requst params: ", request.params);
 
     const notReqFromSim = notReqFromSimulator(req);
 
     if(notReqFromSim){
-		res.status(notReqFromSim[0]).send(notReqFromSim[1])
-		next()
+        console.log("Request was not from simulator. Sending BadRequest");
+		res.status(notReqFromSim[0]).send(notReqFromSim[1]);
+		next();
         return;
     }
 
     const userId = await getUserId(req.params.username);
+    console.log("Who user read from req.params.username:");
     console.log(req.params.username);
-    console.log(userId);
+    console.log("id: ", userId);
     if (!userId) {
+        console.log("Who userId was null. Sending BadRequest");
         res.sendStatus(404);
-		next()
+		next();
         return;
     }
 
     if (Object.keys(req.body).indexOf('follow') !== -1) { //if we should follow the given user
+        console.log("Follow request is of type follow");
         const userToFollowId = await getUserId(req.body.follow);
+        console.log("whom userId: ", userToFollowId);
         if (userToFollowId == null) {
+            console.log("Whom userId was null. Sending BadRequest.")
 			res.status(404).send("Invalid user to follow");
-			next()
+			next();
             return;
         }
         await db.Followers.create({
             who_id: userId,
             whom_id: userToFollowId
         });
+        console.log("Follow was a success!");
         res.status(200).send("You are now following " + req.body.follow);
-		next()
+		next();
         return;
     }
     
     if (Object.keys(req.body).indexOf('unfollow') !== -1) { //if we should unfollow the given user
+        console.log("Follow request is of type unfollow");
         const userToUnFollowId = await getUserId(req.body.unfollow);
         if (userToUnFollowId == null) {
+            console.log("Whom userId was null. Sending BadRequest");
             res.sendStatus(404, "Invalid user to unfollow");
-			next()
-            return
+			next();
+            return;
         }
         await db.Followers.destroy({
             where: {
@@ -330,11 +342,14 @@ app.post('/fllws/:username', async(req, res, next) => {
                 whom_id: userToUnFollowId
             }
         });
+        console.log("Unfollow was a success!");
         res.status(200).send("You have unfollowed " + req.body.unfollow);
-		next()
+		next();
         return;
     }
-	next()
+    console.log("We should not have ended here... Only within one of the if-branches!");
+    console.log();
+	next();
 });
 
 app.get('/fllws/:username', async(req, res, next) => {
