@@ -24,14 +24,57 @@ function beforeMiddleware(req, res, next) {
 
 function afterMiddleware(req, res, next) {
   const route = url.parse(req.url).pathname
-  if(route !== '/metrics') {
-	const response = res.statusCode.toString()
+  const response = res.statusCode.toString()
+  switch(route) {
+	case '/metrics':
+	  return;
+	case '/register':
+	  monitoring.register_request_counter.inc()
+	  if(response[0] == '2') monitoring.register_success_counter.inc()
+	  else if(response[0] == '4') monitoring.register_failure_counter.inc()
+	  break;
+	case '/msgs':
+	  monitoring.getMessages_request_counter.inc()
+	  if(response[0] == '2') monitoring.getMessages_success_counter.inc()
+	  else if (response[0] == '4') monitoring.register_failure_counter.inc()
+	  break;
+	case '/msgs/:username':
+	  if(req.method == 'GET') {
+		monitoring.getMessages_username_request_counter.inc()
+		if(response[0] == '2') monitoring.getMessages_username_success_counter.inc()
+		else if (response[0] == '4') monitoring.getMessages_username_failure_counter.inc()
+	  }
+	  else if (req.method == 'POST') {
+		monitoring.messages_request_counter.inc()
+		if(response[0] == '2') monitoring.messages_success_counter.inc()
+		else if (response[0] == '4') monitoring.messages_failure_counter.inc()
+	  } 
+	  break;
+	case '/fllws/:username':
+	  if(req.method == 'GET') {
+		monitoring.getFollows_request_counter.inc()
+		if(response[0] == '2') monitoring.getFollows_success_counter.inc()
+		else if(response[0] == '4') monitoring.getFollows_failure_counter.inc()
+	  }
+	  else if(req.method == 'POST') {
+		if (Object.keys(req.body).indexOf('follow') !== -1) {
+		  monitoring.follow_request_counter.inc()
+		  if(response[0] == '2') monitoring.follow_success_counter.inc()
+		  else if(response[0] == '4') monitoring.follow_failure_counter.inc()
+		}
+		else if (Object.keys(req.body).indexOf('unfollow') !== -1) {
+		  monitoring.unfollow_request_counter.inc()
+		  if(response[0] == '2') monitoring.unfollow_success_counter.inc()
+		  else if(response[0] == '4') monitoring.unfollow_failure_counter.inc()
+		}
+	  }
+	  break;
+  }
 	if (response[0] =='1') monitoring.information_response_counter.inc()
 	else if(response[0] == '2') monitoring.success_response_counter.inc()
 	else if (response[0] == '3') monitoring.redirect_response_counter.inc()
 	else if (response[0] == '4') monitoring.client_error_response_counter.inc()
 	else if (response[0] == '5') monitoring.server_error_response_counter.inc()
-  }
 }
 
 app.get('/metrics', async(req, res, next) =>
@@ -259,10 +302,8 @@ app.post('/fllws/:username', async(req, res, next) => {
     }
 
     if (Object.keys(req.body).indexOf('follow') !== -1) { //if we should follow the given user
-		Monitoring.follow_request_counter.inc()
         const userToFollowId = await getUserId(req.body.follow);
         if (userToFollowId == null) {
-			Monitoring.follow_failure_counter.inc()
 			res.status(404).send("Invalid user to follow");
 			next()
             return;
@@ -271,7 +312,6 @@ app.post('/fllws/:username', async(req, res, next) => {
             who_id: userId,
             whom_id: userToFollowId
         });
-		Monitoring.follow_success_counter.inc()
         res.status(200).send("You are now following " + req.body.follow);
 		next()
         return;
