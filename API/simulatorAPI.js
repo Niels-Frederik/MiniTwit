@@ -36,9 +36,9 @@ function afterMiddleware(req, res, next) {
 	case '/msgs':
 	  monitoring.getMessages_request_counter.inc()
 	  if(response[0] == '2') monitoring.getMessages_success_counter.inc()
-	  else if (response[0] == '4') monitoring.register_failure_counter.inc()
+	  else if (response[0] == '4') monitoring.getMessages_failure_counter.inc()
 	  break;
-	case '/msgs/:username':
+	case (route.match('/msgs/\.+') || {}).input:
 	  if(req.method == 'GET') {
 		monitoring.getMessages_username_request_counter.inc()
 		if(response[0] == '2') monitoring.getMessages_username_success_counter.inc()
@@ -50,7 +50,7 @@ function afterMiddleware(req, res, next) {
 		else if (response[0] == '4') monitoring.messages_failure_counter.inc()
 	  } 
 	  break;
-	case '/fllws/:username':
+	case (route.match('/fllws/\.+') || {}).input:
 	  if(req.method == 'GET') {
 		monitoring.getFollows_request_counter.inc()
 		if(response[0] == '2') monitoring.getFollows_success_counter.inc()
@@ -250,7 +250,7 @@ app.get('/msgs/:username', async (req, res, next) =>
 app.post('/msgs/:username', async (req, res, next) => 
 {
     updateLatest(req);
-    console.log("Recieved a Post to /msgs/:username with username: " + req.params.username);
+    console.log("Received a Post to /msgs/:username with username: " + req.params.username);
 
     notFromSim = notReqFromSimulator(req);
     if (notFromSim) {
@@ -375,9 +375,11 @@ app.get('/fllws/:username', async(req, res, next) => {
 
 
     let resultList = [];
-    result.forEach((item, i) => {
-        resultList.push(item['username']);
-    });
+	if(!result) {
+	  result.forEach((item, i) => {
+		  resultList.push(item['username']);
+	  });
+	}
     res.send({'followers': resultList});
 	next()
     return;
