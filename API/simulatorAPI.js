@@ -285,7 +285,7 @@ app.post('/fllws/:username', async(req, res, next) => {
     updateLatest(req);
     console.log("Recieved a Post follow request:");
     console.log("request body: ", req.body);
-    console.log("requst params: ", request.params);
+    console.log("requst params: ", req.params);
 
     const notReqFromSim = notReqFromSimulator(req);
 
