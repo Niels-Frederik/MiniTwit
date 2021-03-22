@@ -3,15 +3,19 @@ version: '3'
 services:
   sim-api:
     container_name: sim-api
-    image: index.docker.io/minitwit/simulator
+    build:
+      context: ./API
+      dockerfile: Dockerfile_simulator_api-development
     ports: 
       - "5001:5001"
     networks:
       - local
-      
+
   api:
     container_name: api
-    image: index.docker.io/minitwit/api
+    build:
+      context: ./API
+      dockerfile: Dockerfile-development
     ports:
       - "5000:5000"
     depends_on:
@@ -21,8 +25,10 @@ services:
       - local
 
   frontend:
-    container_name: frontend
-    image: index.docker.io/minitwit/frontend
+    container_name: frontend-development
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile-development
     ports:
       - "3000:80"
     depends_on: 
@@ -31,13 +37,6 @@ services:
       - prometheus
     networks: 
       - local
-
-  watchtower:
-    image: v2tec/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /root/snap/docker/796/.docker/config.json:/config.json
-    command: --interval 30
 
   prometheus:
     image: prom/prometheus
@@ -49,7 +48,6 @@ services:
     networks:
       - local
 
-
   grafana:
     image: grafana/grafana:4.5.2
     container_name: grafana
@@ -59,7 +57,7 @@ services:
       - GF_SECURITY_ADMIN_USER=devops21
       - GF_SECURITY_ADMIN_PASSWORD=-lEtMEIn-
     ports:
-      - "3001:3000"
+      - "3002:3000"
     networks:
       - local
 
