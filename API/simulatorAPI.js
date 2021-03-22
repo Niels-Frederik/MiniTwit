@@ -322,7 +322,7 @@ app.post('/fllws/:username', async(req, res, next) => {
             whom_id: userToFollowId
         });
         console.log("Follow was a success!");
-        res.status(200).send("You are now following " + req.body.follow);
+        res.status(204).send("You are now following " + req.body.follow);
 		next();
         return;
     }
@@ -343,7 +343,7 @@ app.post('/fllws/:username', async(req, res, next) => {
             }
         });
         console.log("Unfollow was a success!");
-        res.status(200).send("You have unfollowed " + req.body.unfollow);
+        res.status(204).send("You have unfollowed " + req.body.unfollow);
 		next();
         return;
     }
