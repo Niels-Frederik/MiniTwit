@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha simulatorAPI.test.js",
+    "test": "mocha NODE_ENV=development simulatorAPI.test.js",
     "start": "cross-env NODE_ENV=development nodemon index.js",
     "start-simulator": "nodemon simulatorAPI.js",
     "start-all": "nodemon index.js & nodemon simulatorAPI.js",
