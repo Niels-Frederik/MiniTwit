@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: stefanoeb/eslint-action@1.0.2
         with:
+          context: ./API
           files: ./API
 
   build_and_deploy_frontend:
