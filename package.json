@@ -1,4 +1,9 @@
 {
   "private": true,
-  "workspaces": ["expressjs"]
+  "workspaces": [
+    "expressjs"
+  ],
+  "dependencies": {
+    "eslint": "^7.23.0"
+  }
 }
