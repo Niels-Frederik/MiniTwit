@@ -1,6 +1,6 @@
 const express = require("express");
 const bcrypt = require('bcrypt');
-const dotenv = require('dotenv').config();
+// const dotenv = require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const cookie_parser = require('cookie-parser')
 const cors = require('cors')
@@ -50,7 +50,7 @@ app.get('/metrics', async(req, res) =>
 //redirect to the public timeline.  This timeline shows the user's
 //messages as well as all the messages of followed users
 app.get('/', async (req, res) => {
-
+	var test =123;
     const userId = await getUserIdFromJwtToken(req);
     if (userId == null) res.redirect("public_timeline")
     else res.redirect("timeline");
@@ -61,6 +61,7 @@ app.get('/timeline', async(req,res) =>
     const userId = await getUserIdFromJwtToken(req);
 	if (userId == null) 
 	{
+		var test2=123;
 		//res.send()
 		res.redirect('public_timeline');
 		return
@@ -146,7 +147,7 @@ app.post('/:username/follow', async (req,res) =>
 	}
 	const whomId = await getUserId(req.params.username)
 	if (whomId == null) 
-	{orton
+	{
 		res.sendStatus(404)
 		return
 	}
@@ -324,7 +325,7 @@ app.get('/:username', async (req,res) =>
 			attributes:  ['whom_id']
 		})
 
-		followedOptions = 0
+		var followedOptions = 0
 		if (whomId == userId) followedOptions = 0
 		else if (followed) followedOptions = 1
 		else followedOptions = 2

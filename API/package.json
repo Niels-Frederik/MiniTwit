@@ -6,7 +6,8 @@
   "scripts": {
     "start": "cross-env NODE_ENV=development nodemon index.js",
     "start-simulator": "nodemon simulatorAPI.js",
-    "start-all": "nodemon index.js & nodemon simulatorAPI.js"
+    "start-all": "nodemon index.js & nodemon simulatorAPI.js",
+    "lint": "./node_modules/.bin/eslint ./"
   },
   "author": "",
   "license": "ISC",
@@ -23,5 +24,8 @@
     "prom-client": "^13.1.0",
     "sequelize": "^6.5.0",
     "sqlite3": "^5.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.22.0"
   }
 }
