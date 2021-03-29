@@ -7,13 +7,15 @@
             "quoteIdentifiers": false
         }
     },
-
     "production" : {
         "database":
         {
             "dialect" : "postgres",
             "storage" : ""
         }
-
-    }
+    },
+	"test": {
+	  "database": "simulator_api_test",
+	  "dialect": "sqlite"
+	}
 }

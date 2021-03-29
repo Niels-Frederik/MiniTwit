@@ -2,6 +2,10 @@ const assert = require('assert')
 const db = require('./entities')
 //const api = require('./simulatorAPI')
 
+before(async function() {
+  db.sequelize.sync({ force: false });
+});
+
 beforeEach(async function() {
   //await db.clear();
   //await db.save([tobi, loki, jane]);
@@ -40,6 +44,6 @@ describe('getUserId', async () => {
 	  }
 	});
 
-	assert.notEqual(user, null)
+	assert.equal(user, null)
   });
 });
