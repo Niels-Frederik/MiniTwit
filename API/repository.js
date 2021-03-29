@@ -1,0 +1,180 @@
+const db = require('./entities');
+
+export async function getUserIdAsync(username) {
+    const user = await db.Users.findOne({
+        where: {
+          username: username,
+        },
+      });
+      if (user) return user.user_id;
+      return null;
+}
+
+export async function getTimelineAsync(userId, per_page) {
+
+    const followedId = await db.Followers.findAll({
+		where: {
+			who_id: userId
+		},
+		raw: true,
+		attributes:  ['whom_id']
+	}).then(e => e.map(v => v.whom_id))
+	const result = await db.Messages.findAll({
+		include: [{
+			model: db.Users,
+			attributes: []
+		}],
+		where: {
+			[Op.and]: [
+				{ flagged: 0 }, 
+				{ [Op.or]: [ 
+					{ '$user.user_id$': userId, },
+					{ '$user.user_id$': followedId} 
+				]},
+			]
+		},
+		raw: true,
+		order: [['pub_date', 'DESC']],
+		attributes: ['user.username', 'text', 'pub_date'],
+		limit: per_page
+	})
+	return {"messages": result, "followedOptions": -1};
+}
+
+export async function getPublicTimelineAsync(per_page) {
+    const result = await db.Messages.findAll({
+		include: [{
+			model: db.Users, 
+			attributes: []
+		}],
+		where: {
+			flagged: 0
+		},
+		raw: true,
+		order: [['pub_date', 'DESC']],
+		attributes: ['user.username', 'text', 'pub_date'],
+		limit: per_page
+	});
+
+	return {"messages": result, "followedOptions": -1};
+}
+
+export async function followUserAsync(whoId, whomId) {
+    return await db.Followers.create({
+		who_id: whoId,
+		whom_id: whomId
+	});
+}
+
+export async function unfollowUserAsync(whoId, whomId) {
+    return await db.Followers.destroy({
+		where: {
+			who_id: whoId,
+			whom_id: whomId
+		}
+	});
+}
+
+export async function postMessageAsync() {
+    const date = (Math.floor(Date.now()/1000))
+		await db.Messages.create({
+			author_id: userId,
+			text: text,
+			pub_date: date,
+			flagged: 0
+		})
+}
+
+export async function findByUsernameAsync(username) {
+    return await db.Users.findOne({
+		where: {
+			username: username
+		}
+	});
+}
+
+export async function createUserAsync(username, email, pwhash) {
+    return await db.Users.create({
+        username: username,
+        email: email,
+        pw_hash: pwhash
+    });
+}
+
+export async function getMessagesAsync(userId) {
+    return await db.Messages.findAll({
+		where: {
+			author_id: userId
+		},
+		attributes: ["text", "pub_date"]
+	});
+}
+
+export async function getIsWhoFollowingWhomAsync(whoId, whomId) {
+    const follower = await db.Followers.findOne({
+        where: {
+            who_id: whoId,
+            whom_id: whomId 
+        },
+        raw: true,
+        attributes:  ['whom_id']
+    });
+
+    if (follower) {
+        return true;
+    }
+    return false;
+}
+
+export async function simulatorGetAllMessagesAsync(limit) {
+    return await db.Messages.findAll({
+        include: [
+          {
+            model: db.Users,
+            attributes: [],
+          },
+        ],
+        where: {
+          flagged: 0,
+        },
+        raw: true,
+        order: [["pub_date", "DESC"]],
+        attributes: ["user.username", "text", "pub_date"],
+        limit: limit,
+      });
+}
+
+export async function simulatorGetUserMessagesAsync(userId) {
+    return await db.Messages.findAll({
+        include: [
+          {
+            model: db.Users,
+            attributes: [],
+          },
+        ],
+        where: {
+          flagged: 0,
+          author_Id: userId,
+        },
+        raw: true,
+        order: [["pub_date", "DESC"]],
+        attributes: ["user.username", "text", "pub_date"],
+        limit: limit,
+      });
+}
+
+export async function simulatorGetFollowersAsync(userId, limit) {
+    return await db.Followers.findAll({
+        include: {
+          model: db.Users,
+          as: "who",
+          attributes: [],
+        },
+        where: {
+          whom_id: userId,
+        },
+        attributes: ["who.username"],
+        raw: true,
+        limit: limit,
+      });
+}
