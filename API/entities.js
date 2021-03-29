@@ -6,7 +6,7 @@ const db = {};
 
 let sequelize = 
   process.env.NODE_ENV == 'test' ?
-	new Sequelize('sqlite::memory:') :
+	new Sequelize('sqlite::memory:', {logging: false}) :
     new Sequelize
     ({
         username: process.env.DB_USERNAME,
