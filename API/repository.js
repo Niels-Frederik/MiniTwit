@@ -1,14 +1,5 @@
 const db = require('./entities');
-
-async function getUserIdAsync(username) {
-    const user = await db.Users.findOne({
-        where: {
-          username: username,
-        },
-      });
-      if (user) return user.user_id;
-      return null;
-}
+const { Op } = require('sequelize');
 
 async function getTimelineAsync(userId, per_page) {
 
@@ -75,7 +66,7 @@ async function unfollowUserAsync(whoId, whomId) {
 	});
 }
 
-async function postMessageAsync() {
+async function postMessageAsync(userId, text) {
     const date = (Math.floor(Date.now()/1000))
 		await db.Messages.create({
 			author_id: userId,
@@ -94,6 +85,14 @@ async function findByUsernameAsync(username) {
 }
 
 async function createUserAsync(username, email, pwhash) {
+    const existingUser = await db.Users.findOne({
+        where: {
+            email: email
+        }
+    });
+    if (existingUser) {
+        return undefined;
+    }
     return await db.Users.create({
         username: username,
         email: email,
@@ -180,7 +179,6 @@ async function simulatorGetFollowersAsync(userId, limit) {
 }
 
 module.exports = {
-    getUserIdAsync,
     getTimelineAsync,
     getPublicTimelineAsync,
     followUserAsync,
