@@ -94,6 +94,7 @@ function notReqFromSimulator(req) {
   }
 }
 
+// exists in repo
 async function getUserId(username) {
   const user = await db.Users.findOne({
     where: {
@@ -129,6 +130,7 @@ app.post("/register", async (req, res, next) => {
   else if (!pwd) error = "You have to enter a password";
   else if (userid != null) error = "The username is already taken";
   else {
+    // exists in repo
     await db.Users.create({
       username: username,
       email: email,
@@ -159,6 +161,7 @@ app.get("/msgs", async (req, res, next) => {
 
   let limit = req.query.no;
   if (!limit) limit = 100;
+  // exists in repo
   const result = await db.Messages.findAll({
     include: [
       {
@@ -209,6 +212,7 @@ app.get("/msgs/:username", async (req, res, next) => {
   let limit = req.query.no;
   if (!limit) limit = 100;
   let result = null;
+  // exists in repo
   result = await db.Messages.findAll({
     include: [
       {
@@ -264,6 +268,7 @@ app.post("/msgs/:username", async (req, res, next) => {
     next();
     return;
   } else {
+    // exists in repo
     const date = Math.floor(Date.now() / 1000);
     await db.Messages.create({
       author_id: userid,
@@ -314,6 +319,7 @@ app.post("/fllws/:username", async (req, res, next) => {
       next();
       return;
     }
+    // exists in repo
     await db.Followers.create({
       who_id: userId,
       whom_id: userToFollowId,
@@ -334,6 +340,7 @@ app.post("/fllws/:username", async (req, res, next) => {
       next();
       return;
     }
+    // exists in repo
     await db.Followers.destroy({
       where: {
         who_id: userId,
@@ -374,6 +381,7 @@ app.get("/fllws/:username", async (req, res, next) => {
   let limit = req.query.no;
   if (limit == null) limit == 100;
 
+  //exists in repo
   const result = await db.Followers.findAll({
     include: {
       model: db.Users,
