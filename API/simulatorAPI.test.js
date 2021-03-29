@@ -1,5 +1,6 @@
 const assert = require('assert')
 const db = require('./entities')
+const repo = require('./repository')
 //const api = require('./simulatorAPI')
 
 before(async function() {
@@ -65,7 +66,8 @@ describe('getUserId', async () => {
 		username: 'Martin',
 	  }
 	});
+	const user2 = await repo.findByUsernameAsync('Martin');
 
-	assert.notEqual(user, null)
+	assert.notEqual(user2, null)
   });
 });

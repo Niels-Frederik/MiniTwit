@@ -1,6 +1,6 @@
 const db = require('./entities');
 
-export async function getUserIdAsync(username) {
+async function getUserIdAsync(username) {
     const user = await db.Users.findOne({
         where: {
           username: username,
@@ -10,7 +10,7 @@ export async function getUserIdAsync(username) {
       return null;
 }
 
-export async function getTimelineAsync(userId, per_page) {
+async function getTimelineAsync(userId, per_page) {
 
     const followedId = await db.Followers.findAll({
 		where: {
@@ -41,7 +41,7 @@ export async function getTimelineAsync(userId, per_page) {
 	return {"messages": result, "followedOptions": -1};
 }
 
-export async function getPublicTimelineAsync(per_page) {
+async function getPublicTimelineAsync(per_page) {
     const result = await db.Messages.findAll({
 		include: [{
 			model: db.Users, 
@@ -59,14 +59,14 @@ export async function getPublicTimelineAsync(per_page) {
 	return {"messages": result, "followedOptions": -1};
 }
 
-export async function followUserAsync(whoId, whomId) {
+async function followUserAsync(whoId, whomId) {
     return await db.Followers.create({
 		who_id: whoId,
 		whom_id: whomId
 	});
 }
 
-export async function unfollowUserAsync(whoId, whomId) {
+async function unfollowUserAsync(whoId, whomId) {
     return await db.Followers.destroy({
 		where: {
 			who_id: whoId,
@@ -75,7 +75,7 @@ export async function unfollowUserAsync(whoId, whomId) {
 	});
 }
 
-export async function postMessageAsync() {
+async function postMessageAsync() {
     const date = (Math.floor(Date.now()/1000))
 		await db.Messages.create({
 			author_id: userId,
@@ -85,7 +85,7 @@ export async function postMessageAsync() {
 		})
 }
 
-export async function findByUsernameAsync(username) {
+async function findByUsernameAsync(username) {
     return await db.Users.findOne({
 		where: {
 			username: username
@@ -93,7 +93,7 @@ export async function findByUsernameAsync(username) {
 	});
 }
 
-export async function createUserAsync(username, email, pwhash) {
+async function createUserAsync(username, email, pwhash) {
     return await db.Users.create({
         username: username,
         email: email,
@@ -101,7 +101,7 @@ export async function createUserAsync(username, email, pwhash) {
     });
 }
 
-export async function getMessagesAsync(userId) {
+async function getMessagesAsync(userId) {
     return await db.Messages.findAll({
 		where: {
 			author_id: userId
@@ -110,7 +110,7 @@ export async function getMessagesAsync(userId) {
 	});
 }
 
-export async function getIsWhoFollowingWhomAsync(whoId, whomId) {
+async function getIsWhoFollowingWhomAsync(whoId, whomId) {
     const follower = await db.Followers.findOne({
         where: {
             who_id: whoId,
@@ -126,7 +126,7 @@ export async function getIsWhoFollowingWhomAsync(whoId, whomId) {
     return false;
 }
 
-export async function simulatorGetAllMessagesAsync(limit) {
+async function simulatorGetAllMessagesAsync(limit) {
     return await db.Messages.findAll({
         include: [
           {
@@ -144,7 +144,7 @@ export async function simulatorGetAllMessagesAsync(limit) {
       });
 }
 
-export async function simulatorGetUserMessagesAsync(userId) {
+async function simulatorGetUserMessagesAsync(userId) {
     return await db.Messages.findAll({
         include: [
           {
@@ -163,7 +163,7 @@ export async function simulatorGetUserMessagesAsync(userId) {
       });
 }
 
-export async function simulatorGetFollowersAsync(userId, limit) {
+async function simulatorGetFollowersAsync(userId, limit) {
     return await db.Followers.findAll({
         include: {
           model: db.Users,
@@ -177,4 +177,20 @@ export async function simulatorGetFollowersAsync(userId, limit) {
         raw: true,
         limit: limit,
       });
+}
+
+module.exports = {
+    getUserIdAsync,
+    getTimelineAsync,
+    getPublicTimelineAsync,
+    followUserAsync,
+    unfollowUserAsync,
+    postMessageAsync,
+    findByUsernameAsync,
+    createUserAsync,
+    getMessagesAsync,
+    getIsWhoFollowingWhomAsync,
+    simulatorGetAllMessagesAsync,
+    simulatorGetFollowersAsync,
+    simulatorGetUserMessagesAsync
 }
