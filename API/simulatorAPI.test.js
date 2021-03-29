@@ -43,31 +43,10 @@ async function initialize() {
 
 }
 
-describe('tests', () => {
-  it('should return 2', () => {
-	assert.equal(1+1, 2)
-  });
-  it('this is nr 2', () => {
-	assert.equal(2+2, 4)
-  });
-});
-
-
-describe('some other tests', () => {
-  it('askadj', () =>{
-	assert.equal(8*8, 64)
-  });
-});
 
 describe('getUserId', async () => {
   it('user exists', async () => {
-	const user = await db.Users.findOne({
-	  where: {
-		username: 'Martin',
-	  }
-	});
-	const user2 = await repo.findByUsernameAsync('Martin');
-
-	assert.notEqual(user2, null)
+	const user = await repo.findByUsernameAsync('Martin');
+	assert.notEqual(user, null)
   });
 });
