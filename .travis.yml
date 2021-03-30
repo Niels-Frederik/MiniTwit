@@ -5,3 +5,4 @@ node_js:
 script: 
   - cd ./API
   - npm ci
+  - npm test
