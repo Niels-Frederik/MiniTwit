@@ -2,7 +2,6 @@ const assert = require('assert')
 const db = require('./entities')
 const repo = require('./repository')
 const sequelize = require("sequelize");
-//const api = require('./simulatorAPI')
 
 before(async function() {
   await db.sequelize.sync({ force: true});
