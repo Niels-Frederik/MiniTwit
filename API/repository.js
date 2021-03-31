@@ -143,7 +143,7 @@ async function simulatorGetAllMessagesAsync(limit) {
       });
 }
 
-async function simulatorGetUserMessagesAsync(userId) {
+async function simulatorGetUserMessagesAsync(userId, limit) {
     return await db.Messages.findAll({
         include: [
           {

@@ -37,7 +37,8 @@ async function initialize() {
   const followers = [
 	{who_id: 1, whom_id: 2},
 	{who_id: 1, whom_id: 3},
-	{who_id:3, whom_id: 1}
+	{who_id:3, whom_id: 1},
+	{who_id:3, whom_id:2}
   ]
   followers.forEach(async (follower) =>  await db.Followers.create(follower));
 
@@ -67,7 +68,7 @@ describe('get timeline async', async () => {
 	  });
 	it('Niller returns 4 messages', async () => {
 	const result = await repo.getTimelineAsync(3, 100);
-	assert(result.messages.length === 4);
+	assert(result.messages.length === 6);
 	});
 });
 
@@ -165,5 +166,61 @@ describe('get messages async', async () => {
 	it('Get messages of non existing user returns empty list', async () => {
 		const messages = await repo.getMessagesAsync(0);
 		assert(messages.length === 0);
+	});
+});
+
+describe('getIsWhoFollowingWhomAsync', async () => {
+	it('Martin is following Hampus', async () => {
+	  const isFollowing = await repo.getIsWhoFollowingWhomAsync(1, 2);
+	  assert(isFollowing)
+	});
+	it('Hampus is not following Martin', async () => {
+	  const isFollowing = await repo.getIsWhoFollowingWhomAsync(2, 1);
+	  assert(!isFollowing)
+	});
+});
+
+describe('simulatorGetAllMessagesAsync', async () => {
+	it('Returns all 6 messages', async () => {
+	  const messages = await repo.simulatorGetAllMessagesAsync(100);
+	  assert(messages.length, 6)
+	});
+	it('Returns all messages limited to 3', async() => {
+	  const messages = await repo.simulatorGetAllMessagesAsync(3);
+	  assert(messages.length, 3)
+	});
+});
+
+describe('simulatorGetUserMessagesAsync', async() => {
+	it('Get all Martins 4 messages', async() => {
+	  const messages = await repo.simulatorGetUserMessagesAsync(1, 100)
+	  assert(messages.length, 4)
+	});
+	it('Get 2 of Martins messages with limit on 2', async() => {
+	  const messages = await repo.simulatorGetAllMessagesAsync(1, 2)
+	  assert(messages.length, 2)
+	});
+	it("Get 0 messages from user who hasn't posted yet", async() => {
+	  const messages = await repo.simulatorGetUserMessagesAsync(3, 100)
+	  assert(messages.length==0)
+	});
+	it("Get 0 messages from user who doesn't exist", async() => {
+	  const messages = await repo.simulatorGetUserMessagesAsync(50, 100)
+	  assert(messages.length==0)
+	});
+});
+
+describe('simulatorGetFollowersAsync', async() => {
+	it('get all Hampus 2 followers', async() => {
+	  const followers = await repo.simulatorGetFollowersAsync(2, 50)
+	  assert(followers.length, 2)
+	});
+	it('get Hampus followers with limit on 1', async() => {
+	  const followers = await repo.simulatorGetFollowersAsync(2, 1)
+	  assert(followers.length, 1)
+	});
+	it('get followers of user without followers', async() => {
+	  const followers = await repo.simulatorGetFollowersAsync(4, 50)
+	  assert(followers.length==0)
 	});
 });
