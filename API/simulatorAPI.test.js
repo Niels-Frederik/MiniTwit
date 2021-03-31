@@ -167,7 +167,7 @@ describe('get messages async', async () => {
 		const messages = await repo.getMessagesAsync(0);
 		assert(messages.length === 0);
 	});
-});
+  });
 
 describe('getIsWhoFollowingWhomAsync', async () => {
 	it('Martin is following Hampus', async () => {

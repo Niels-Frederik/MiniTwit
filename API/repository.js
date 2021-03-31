@@ -84,6 +84,12 @@ async function findByUsernameAsync(username) {
 	});
 }
 
+async function getUserId(username) {
+  const user = await findByUsernameAsync(username)
+  if (user) return user.user_id
+  return null
+}
+
 async function createUserAsync(username, email, pwhash) {
     const existingUser = await db.Users.findOne({
         where: {
@@ -176,6 +182,21 @@ async function simulatorGetFollowersAsync(userId, limit) {
         raw: true,
         limit: limit,
       });
+}
+
+async function registerUser(username, email, pwd) {
+	const userid = await findByUsernameAsync(username);
+	let error;
+	  
+	if (!username) error = "You have to enter a username";
+	else if (!email) error = "You have to enter an email";
+	else if (!pwd) error = "You have to enter a password";
+	else if (userid != null) error = "The username is already taken";
+	else {
+	  await repo.createUserAsync(username, email, pwd)
+
+	}
+	return error
 }
 
 module.exports = {

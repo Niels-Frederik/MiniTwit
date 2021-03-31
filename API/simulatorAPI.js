@@ -2,6 +2,7 @@ const express = require("express");
 // const { Op } = require('sequelize');
 // const dotenv = require('dotenv').config();
 const db = require("./entities");
+const repo = require("./repository");
 // const { Sequelize } = require('sequelize');
 const url = require("url");
 const prom = require("prom-client");
@@ -94,17 +95,6 @@ function notReqFromSimulator(req) {
   }
 }
 
-// exists in repo
-async function getUserId(username) {
-  const user = await db.Users.findOne({
-    where: {
-      username: username,
-    },
-  });
-  if (user) return user.user_id;
-  return null;
-}
-
 function updateLatest(request) {
   const q = request.query.latest;
   LATEST = q == null ? LATEST : q;
@@ -120,33 +110,12 @@ app.post("/register", async (req, res, next) => {
   updateLatest(req);
 
   const { username, email, pwd } = req.body;
-  const userid = await getUserId(username);
+  const error = await repo.registerUser(username, email, pwd)
 
-//   const requestData = req.json;
-  let error;
-
-  if (!username) error = "You have to enter a username";
-  else if (!email) error = "You have to enter an email";
-  else if (!pwd) error = "You have to enter a password";
-  else if (userid != null) error = "The username is already taken";
-  else {
-    // exists in repo
-    await db.Users.create({
-      username: username,
-      email: email,
-      pw_hash: pwd,
-    });
-  }
-
-  if (error) {
-    res.status(400).send(error);
-    next();
-    return;
-  } else {
-    res.sendStatus(204);
-    next();
-    return;
-  }
+  if (error) res.status(400).send(error)
+  else res.sendStatus(204);
+  next();
+  return;
 });
 
 app.get("/msgs", async (req, res, next) => {
@@ -161,22 +130,8 @@ app.get("/msgs", async (req, res, next) => {
 
   let limit = req.query.no;
   if (!limit) limit = 100;
-  // exists in repo
-  const result = await db.Messages.findAll({
-    include: [
-      {
-        model: db.Users,
-        attributes: [],
-      },
-    ],
-    where: {
-      flagged: 0,
-    },
-    raw: true,
-    order: [["pub_date", "DESC"]],
-    attributes: ["user.username", "text", "pub_date"],
-    limit: limit,
-  });
+  const result = await repo.simulatorGetAllMessagesAsync(limit)
+  //const result = await repo.simulatorGetAllMessagesAsync(req.query.no || 100)
 
   let filteredMsgs = [];
   result.forEach((msg) => {
@@ -202,7 +157,7 @@ app.get("/msgs/:username", async (req, res, next) => {
     return;
   }
 
-  const userid = await getUserId(req.params.username);
+  const userid = await repo.getUserId(req.params.username);
   if (!userid) {
     res.sendStatus(404);
     next();
@@ -258,7 +213,7 @@ app.post("/msgs/:username", async (req, res, next) => {
   }
 
   const text = req.body.content;
-  const userid = await getUserId(req.params.username);
+  const userid = await repo.getUserId(req.params.username);
   if (userid == null || text == "") {
     console.log(
       "   - Post failed: " +
@@ -297,7 +252,7 @@ app.post("/fllws/:username", async (req, res, next) => {
     return;
   }
 
-  const userId = await getUserId(req.params.username);
+  const userId = await repo.getUserId(req.params.username);
   console.log("Who user read from req.params.username:");
   console.log(req.params.username);
   console.log("id: ", userId);
@@ -311,7 +266,7 @@ app.post("/fllws/:username", async (req, res, next) => {
   if (Object.keys(req.body).indexOf("follow") !== -1) {
     //if we should follow the given user
     console.log("Follow request is of type follow");
-    const userToFollowId = await getUserId(req.body.follow);
+    const userToFollowId = await repo.getUserId(req.body.follow);
     console.log("whom userId: ", userToFollowId);
     if (userToFollowId == null) {
       console.log("Whom userId was null. Sending BadRequest.");
@@ -333,7 +288,7 @@ app.post("/fllws/:username", async (req, res, next) => {
   if (Object.keys(req.body).indexOf("unfollow") !== -1) {
     //if we should unfollow the given user
     console.log("Follow request is of type unfollow");
-    const userToUnFollowId = await getUserId(req.body.unfollow);
+    const userToUnFollowId = await repo.getUserId(req.body.unfollow);
     if (userToUnFollowId == null) {
       console.log("Whom userId was null. Sending BadRequest");
       res.sendStatus(404, "Invalid user to unfollow");
@@ -370,7 +325,7 @@ app.get("/fllws/:username", async (req, res, next) => {
     return;
   }
 
-  const userId = await getUserId(req.params.username);
+  const userId = await repo.getUserId(req.params.username);
 
   if (!userId) {
     res.sendStatus(404);
