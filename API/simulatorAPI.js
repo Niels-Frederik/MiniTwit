@@ -167,23 +167,7 @@ app.get("/msgs/:username", async (req, res, next) => {
   let limit = req.query.no;
   if (!limit) limit = 100;
   let result = null;
-  // exists in repo
-  result = await db.Messages.findAll({
-    include: [
-      {
-        model: db.Users,
-        attributes: [],
-      },
-    ],
-    where: {
-      flagged: 0,
-      author_Id: userid,
-    },
-    raw: true,
-    order: [["pub_date", "DESC"]],
-    attributes: ["user.username", "text", "pub_date"],
-    limit: limit,
-  });
+  result = await repo.simulatorGetUserMessagesAsync(userid, limit)
 
   let filteredMsgs = [];
   result.forEach((msg) => {
@@ -223,14 +207,7 @@ app.post("/msgs/:username", async (req, res, next) => {
     next();
     return;
   } else {
-    // exists in repo
-    const date = Math.floor(Date.now() / 1000);
-    await db.Messages.create({
-      author_id: userid,
-      text: text,
-      pub_date: date,
-      flagged: 0,
-    });
+	await repo.postMessageAsync(userid, text)
     res.sendStatus(204);
     next();
     return;
@@ -274,11 +251,7 @@ app.post("/fllws/:username", async (req, res, next) => {
       next();
       return;
     }
-    // exists in repo
-    await db.Followers.create({
-      who_id: userId,
-      whom_id: userToFollowId,
-    });
+	await repo.followUserAsync(userId, userToFollowId)
     console.log("Follow was a success!");
     res.status(204).send("You are now following " + req.body.follow);
     next();
@@ -295,13 +268,7 @@ app.post("/fllws/:username", async (req, res, next) => {
       next();
       return;
     }
-    // exists in repo
-    await db.Followers.destroy({
-      where: {
-        who_id: userId,
-        whom_id: userToUnFollowId,
-      },
-    });
+	await repo.unfollowUserAsync(userId, userToUnFollowId)
     console.log("Unfollow was a success!");
     res.status(204).send("You have unfollowed " + req.body.unfollow);
     next();
@@ -337,19 +304,7 @@ app.get("/fllws/:username", async (req, res, next) => {
   if (limit == null) limit == 100;
 
   //exists in repo
-  const result = await db.Followers.findAll({
-    include: {
-      model: db.Users,
-      as: "who",
-      attributes: [],
-    },
-    where: {
-      whom_id: userId,
-    },
-    attributes: ["who.username"],
-    raw: true,
-    limit: limit,
-  });
+  const result = await repo.simulatorGetFollowersAsync(userId, limit)
 
   let resultList = [];
   if (!result) {
