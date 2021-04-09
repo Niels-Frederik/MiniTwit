@@ -1,9 +1,29 @@
 {
+
   "private": true,
   "workspaces": [
     "expressjs"
   ],
   "dependencies": {
     "eslint": "^7.23.0"
+  },
+  "name": "minitwit",
+  "version": "0.0.0-development",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Niels-Frederik/MiniTwit.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Niels-Frederik/MiniTwit/issues"
+  },
+  "homepage": "https://github.com/Niels-Frederik/MiniTwit#readme",
+  "release": {
+    "branches": [
+      "main",
+      "next"
+    ]
   }
 }
