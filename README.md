@@ -1,7 +1,5 @@
 # MiniTwit
 
-Release 3.1
+Release Notes
 -----------
-* Automatic release
 * Unit tests on APIs
-
