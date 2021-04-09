@@ -1,12 +1,4 @@
 {
-
-  "private": true,
-  "workspaces": [
-    "expressjs"
-  ],
-  "dependencies": {
-    "eslint": "^7.23.0"
-  },
   "name": "minitwit",
   "version": "0.0.0-development",
   "description": "",
