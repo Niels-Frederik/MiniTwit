@@ -85,9 +85,9 @@ async function findByUsernameAsync(username) {
 }
 
 async function getUserId(username) {
-  const user = await findByUsernameAsync(username)
-  if (user) return user.user_id
-  return null
+	const user = await findByUsernameAsync(username)
+	if (user) return user.user_id
+	return null
 }
 
 async function createUserAsync(username, email, pwhash) {
@@ -206,6 +206,7 @@ module.exports = {
     unfollowUserAsync,
     postMessageAsync,
     findByUsernameAsync,
+	getUserId,
     createUserAsync,
     getMessagesAsync,
     getIsWhoFollowingWhomAsync,
