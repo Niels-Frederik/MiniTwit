@@ -1,10 +1,13 @@
 {
   "private": true,
   "workspaces": [
-    "expressjs", "minitwitapp"
+    "expressjs",
+    "minitwitapp"
   ],
   "dependencies": {
     "eslint": "^7.23.0"
+  },
+  "devDependencies": {
+    "eslint-plugin-react": "^7.23.2"
   }
 }
-
