@@ -8,5 +8,4 @@ RUN npm install -production
 COPY . .
 RUN ls -l
 ENV NODE_ENV=development
-
-CMD ["node", "simulatorAPI.js"]
+CMD ["node", "simulatorAPI.js", ">", "app.log 2>&1"]
