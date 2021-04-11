@@ -1,9 +1,10 @@
 {
   "private": true,
   "workspaces": [
-    "expressjs"
+    "expressjs", "minitwitapp"
   ],
   "dependencies": {
     "eslint": "^7.23.0"
   }
 }
+

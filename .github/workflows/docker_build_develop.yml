@@ -15,7 +15,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
-  eslint:
+  eslintAPI:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -24,9 +24,18 @@ jobs:
           files: API/
         continue-on-error: false
 
+  eslintFrontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: stefanoeb/eslint-action@1.0.2
+        with:
+          files: Frontend/
+        continue-on-error: false
+
   build_and_deploy_frontend:
     name: Build and Deploy frontend
-    needs: eslint
+    needs: eslintFrontend
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -48,7 +57,7 @@ jobs:
           
   build_and_deploy_api:
     name: Build and Deploy Api
-    needs: eslint
+    needs: eslintAPI
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -77,7 +86,7 @@ jobs:
 
   build_and_deploy_simulator:
     name: Build and Deploy Simulator
-    needs: eslint
+    needs: eslintAPI
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
