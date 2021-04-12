@@ -22,6 +22,10 @@ function Register() {
 
     async function submit (e){
         e.preventDefault();
+
+        if (confirmPassword !== password){
+            alert('Passwords are not equal');
+        }
     
         await axios({
             method: 'post',

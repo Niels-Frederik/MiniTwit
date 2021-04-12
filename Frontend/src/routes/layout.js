@@ -5,7 +5,7 @@ import Register from './register'
 import Timeline from './timeline'
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
-import cookies from "js-cookie";
+// import cookies from "js-cookie";
 import auth from '../util/auth';
 import {API_BASE_PATH} from '../constants';
 
@@ -73,7 +73,7 @@ function Layout() {
                 <Route 
                     path="/public_timeline" 
                     render={(props) => (
-                        <Timeline {...props} publicTimeline={true} key={document.location.href} />
+                        <Timeline {...props} publicTimeline={true} userMessages={false} key={document.location.href} />
                     )}
                 />
                 
@@ -95,14 +95,14 @@ function Layout() {
                 <Route path="/:username"
                     exact={true}
                     render={(props) => (
-                        <Timeline {...props} publicTimeline = {false} userMessages={true} key={document.location.href}/>
+                        <Timeline {...props} publicTimeline={false} userMessages={true} key={document.location.href}/>
                     )}
                 />
                 
                 <Route
                     path="/"
                     exact={true}
-                        render={(props) => (
+                        render={() => (
                             <Redirect to = "/public_timeline"/>
                     )}
                 />

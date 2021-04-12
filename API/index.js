@@ -50,7 +50,7 @@ app.get('/metrics', async(req, res) =>
 //redirect to the public timeline.  This timeline shows the user's
 //messages as well as all the messages of followed users
 app.get('/', async (req, res) => {
-	var test =123;
+
     const userId = await getUserIdFromJwtToken(req);
     if (userId == null) res.redirect("public_timeline")
     else res.redirect("timeline");
@@ -61,7 +61,6 @@ app.get('/timeline', async(req,res) =>
     const userId = await getUserIdFromJwtToken(req);
 	if (userId == null) 
 	{
-		var test2=123;
 		//res.send()
 		res.redirect('public_timeline');
 		return

@@ -146,6 +146,9 @@ app.get("/msgs", async (req, res, next) => {
   });
 
   res.send(filteredMsgs);
+  console.log("Recived request for messages, and returned " + filteredMsgs.length + " messages")
+  console.error("some random error here")
+  console.warn("some random warning here")
   next();
   return;
 });

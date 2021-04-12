@@ -1,14 +1,8 @@
+import React from 'react';
 import '../routes/layout.css';
-import {Link, Route} from 'react-router-dom'
-//import Timeline from '../routes/timeline'
+import PropTypes from 'prop-types';
 
 function Message({ username, text, pub_date }) {
-
-  //function getMessage()
-  //{
-    //const username = m.username
-    //const text = m.text
-    //const pub_date = m.pub_date
     return (
       <li key={username}>
           <img src={ "http://www.gravatar.com/avatar/4a539d5e489c4f378d0e642d640f9a59?d=identicon&amp;s=48" }></img>
@@ -25,26 +19,13 @@ function Message({ username, text, pub_date }) {
           </p>
       </li>
     );
-  //}
-/*
-  return (
-    <div className="page">
-      <div classname="message">{getMessage()}</div>
-      <div classname="body"> 
-        <Route 
-        path="/username" 
-        render={(props) => (
-          <Timeline {...props} publicTimeline={true} userMessage={true}/>
-        )}
-        />
-        </div>
-    </div>
-  )
-  */
+
 }
 
+Message.propTypes = {
+  username: PropTypes.string.isRequired,
+  text: PropTypes.string.isRequired,
+  pub_date: PropTypes.number.isRequired,
+};
 
 export default Message;
-
-                  //<Link to= {`/${username}`}>{username} </Link>
-                //<a href= {`/${username}`}>{username}</a>
