@@ -2,7 +2,7 @@
 class Monitoring {
   constructor(prom, register) {
 	register.setDefaultLabels({
-	  app: 'minitwit'
+		app: 'minitwit'
 	})
 	console.log('printing' + register)
 	prom.collectDefaultMetrics({ register })
