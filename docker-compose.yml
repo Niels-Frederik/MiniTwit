@@ -32,12 +32,6 @@ services:
     networks: 
       - local
 
-  watchtower:
-    image: v2tec/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 30
-
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
