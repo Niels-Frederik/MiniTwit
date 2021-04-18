@@ -10,6 +10,8 @@ services:
       - local
     deploy:
       replicas: 2 
+      placement:
+        max_replicas_per_node: 1
       update_config:
         parallelism: 1
         delay: 20s
@@ -26,6 +28,8 @@ services:
     networks: 
       - local
     deploy:
+      placement:
+        max_replicas_per_node: 1
       replicas: 2 
       update_config:
         parallelism: 1
@@ -44,6 +48,8 @@ services:
     networks: 
       - local
     deploy:
+      placement:
+        max_replicas_per_node: 1
       replicas: 2 
       update_config:
         parallelism: 1
