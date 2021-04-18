@@ -24,4 +24,4 @@ jobs:
         KEY: ${{ secrets.DROPLET_PRODUCTION_SSHKEY }}
         script: docker service update --image index.docker.io/minitwit/simulator minitwit_swarm_sim-api &&
                 docker service update --image index.docker.io/minitwit/api minitwit_swarm_api &&
-                docker service update --image index.docker.io/minitwit/frontend minitwit_swarm_frontend &&
+                docker service update --image index.docker.io/minitwit/frontend minitwit_swarm_frontend
