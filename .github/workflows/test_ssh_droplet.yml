@@ -22,4 +22,6 @@ jobs:
         USERNAME: ${{ secrets.DROPLET_PRODUCTION_USERNAME }}
         PORT: 22
         KEY: ${{ secrets.DROPLET_PRODUCTION_SSHKEY }}
-        script: touch my-first-touch.txt && touch my-second-touch.txt
+        script: docker service update --image index.docker.io/minitwit/simulator minitwit_swarm_sim-api &&
+                docker service update --image index.docker.io/minitwit/api minitwit_swarm_api &&
+                docker service update --image index.docker.io/minitwit/frontend minitwit_swarm_frontend &&
