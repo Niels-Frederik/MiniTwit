@@ -8,20 +8,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+
+  update docker swarm services:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - name: Executing remote command
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.DROPLET_PRODUCTION_HOST }}
-        USERNAME: ${{ secrets.DROPLET_PRODUCTION_USERNAME }}
+        host: ${{ secrets.DROPLET_DEVELOP_HOST }}
+        USERNAME: ${{ secrets.DROPLET_DEVELOP_USERNAME }}
         PORT: 22
-        KEY: ${{ secrets.DROPLET_PRODUCTION_SSHKEY }}
-        script: docker service update --image index.docker.io/minitwit/simulator minitwit_swarm_sim-api &&
-                docker service update --image index.docker.io/minitwit/api minitwit_swarm_api &&
-                docker service update --image index.docker.io/minitwit/frontend minitwit_swarm_frontend
+        KEY: ${{ secrets.DROPLET_DEVELOP_SSHKEY }}
+        script: docker service update --image index.docker.io/minitwit/simulator_develop minitwit_swarm_sim-api &&
+                docker service update --image index.docker.io/minitwit/api_develop minitwit_swarm_api &&
+                docker service update --image index.docker.io/minitwit/frontend_develop minitwit_swarm_frontend
