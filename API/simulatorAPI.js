@@ -112,7 +112,7 @@ app.post("/register", async (req, res, next) => {
   updateLatest(req);
 
   const { username, email, pwd } = req.body;
-  const errorMessage;
+  let errorMessage;
 
   try
   {
