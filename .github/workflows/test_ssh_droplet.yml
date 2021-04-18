@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  update docker swarm services:
+  update_docker_swarm_services:
 
     runs-on: ubuntu-latest
 
