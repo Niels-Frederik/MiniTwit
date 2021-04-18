@@ -3,7 +3,7 @@ name: Update Docker Swarm Services
 on:
   push:
     branches: 
-      - main
+      - docker-swarm
 
   workflow_dispatch:
 
