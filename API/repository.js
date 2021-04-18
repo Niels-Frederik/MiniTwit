@@ -209,6 +209,7 @@ module.exports = {
 	getUserId,
     createUserAsync,
     getMessagesAsync,
+	registerUser,
     getIsWhoFollowingWhomAsync,
     simulatorGetAllMessagesAsync,
     simulatorGetFollowersAsync,
