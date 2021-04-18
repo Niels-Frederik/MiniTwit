@@ -1,5 +1,4 @@
 {
-
   "private": true,
   "workspaces": [
     "expressjs",
@@ -26,7 +25,8 @@
       "main",
       "next"
     ],
-  "devDependencies": {
-    "eslint-plugin-react": "^7.23.2"
+    "devDependencies": {
+      "eslint-plugin-react": "^7.23.2"
+    }
   }
 }
