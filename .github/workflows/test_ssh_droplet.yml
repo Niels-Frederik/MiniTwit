@@ -1,0 +1,25 @@
+name: Update Docker Swarm Services
+
+on:
+  push:
+    branches: 
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Executing remote command
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DROPLET_PRODUCTION_HOST }}
+        USERNAME: ${{ secrets.DROPLET_PRODUCTION_USERNAME }}
+        PORT: 22
+        KEY: ${{ secrets.DROPLET_PRODUCTION_SSHKEY }}
+        script: touch my-first-touch.txt
