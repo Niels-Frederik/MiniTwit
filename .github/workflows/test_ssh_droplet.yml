@@ -22,4 +22,4 @@ jobs:
         USERNAME: ${{ secrets.DROPLET_PRODUCTION_USERNAME }}
         PORT: 22
         KEY: ${{ secrets.DROPLET_PRODUCTION_SSHKEY }}
-        script: touch my-first-touch.txt
+        script: touch my-first-touch.txt && touch my-second-touch.txt
