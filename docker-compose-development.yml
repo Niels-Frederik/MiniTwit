@@ -8,6 +8,12 @@ services:
       - "5001:5001"
     networks:
       - local
+    deploy:
+      replicas: 2 
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
       
   api:
     container_name: api
@@ -19,6 +25,12 @@ services:
       - grafana
     networks: 
       - local
+    deploy:
+      replicas: 2 
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
 
   frontend:
     container_name: frontend
@@ -31,6 +43,12 @@ services:
       - prometheus
     networks: 
       - local
+    deploy:
+      replicas: 2 
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
 
   watchtower:
     image: v2tec/watchtower
