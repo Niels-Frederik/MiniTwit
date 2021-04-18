@@ -112,7 +112,17 @@ app.post("/register", async (req, res, next) => {
   updateLatest(req);
 
   const { username, email, pwd } = req.body;
-  const errorMessage = await repo.registerUser(username, email, pwd).catch(error => {res.sendStatus(500); return;})
+
+  try
+  {
+      const errorMessage = await repo.registerUser(username, email, pwd);
+  }
+  catch (error)
+  {
+      console.error(error.message);
+      res.sendStatus(500);
+      return;
+  }
 
   if (errorMessage) res.status(400).send(errorMessage)
   else res.sendStatus(204);
