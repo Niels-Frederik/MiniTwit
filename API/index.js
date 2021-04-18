@@ -66,6 +66,7 @@ app.get('/timeline', async(req,res) =>
 		return
 	}
 	const PER_PAGE = 30;
+	// exists in repo
 	const followedId = await db.Followers.findAll({
 		where: {
 			who_id: userId
@@ -115,6 +116,8 @@ app.get('/public_timeline', async (req,res) =>
     console.log("We got a visitor from: " + ip);
 
     const PER_PAGE = 30;
+
+	// exists in repo
 	const result = await db.Messages.findAll({
 		include: [{
 			model: db.Users, 
@@ -132,7 +135,6 @@ app.get('/public_timeline', async (req,res) =>
 	const obj = {"messages": result, "followedOptions": -1}
 
     res.send(obj);
-    //return;
 })
 
 //Displays a users tweets
@@ -151,6 +153,7 @@ app.post('/:username/follow', async (req,res) =>
 		return
 	}
 	console.log(userId)
+	// exists in repo
 	await db.Followers.create({
 		who_id: userId,
 		whom_id: whomId
@@ -173,6 +176,7 @@ app.delete('/:username/unfollow', async (req,res) =>
 		res.sendStatus(404)
 		return
 	}
+	//exists in repo
 	await db.Followers.destroy({
 		where: {
 			who_id: userId,
@@ -191,6 +195,7 @@ app.post('/add_message', async (req,res) =>
         res.sendStatus(400);
         return;
     } else {
+		// exists in repo postMessage
 		const date = (Math.floor(Date.now()/1000))
 		await db.Messages.create({
 			author_id: userId,
@@ -209,6 +214,7 @@ app.post('/login', async (req,res) =>
 
     if (!(username && password)) res.sendStatus(400)
 
+	// exists in repo findByUsernameAsync
 	const row = await db.Users.findOne({
 		where: {
 			username: username
@@ -259,6 +265,8 @@ app.post('/register', async (req,res) =>
     if (!(username && email && password)) res.sendStatus(400)
 
     //Check if any users with that username already exists
+
+	//exists in repo
 	const userid = await getUserId(username)
     
     //A user already exists
@@ -271,6 +279,7 @@ app.post('/register', async (req,res) =>
         try
         {
             const pw_hash = await bcrypt.hash(req.body.password, 10)
+			// exists in repo
 			await db.Users.create({
 				username: username,
 				email: email,
@@ -294,6 +303,7 @@ app.get('/logout', (req,res) =>
 
 app.get('/:username', async (req,res) =>
 {
+	// replace with repo getUserId
     const whomId = await getUserId(req.params.username)
 	const userId = await getUserIdFromJwtToken(req)
 
@@ -303,6 +313,7 @@ app.get('/:username', async (req,res) =>
         return
     }
 
+	//exists in repo
 	const messages = await db.Messages.findAll({
 		where: {
 			author_id: whomId
@@ -315,6 +326,7 @@ app.get('/:username', async (req,res) =>
 
 		var m = []
 
+		//exists in repo isWhoFollowingWhom
 		const followed = await db.Followers.findOne({
 			where: {
 				who_id: userId,
@@ -369,8 +381,10 @@ async function getUserIdFromJwtToken(req)
     }
 }
 
+//TODO replace with repo function
 async function getUserId(username)
 {
+	//exists in repo
 	const user = await db.Users.findOne({
 		where: {
 			username: username

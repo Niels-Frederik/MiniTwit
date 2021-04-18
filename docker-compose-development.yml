@@ -1,4 +1,4 @@
-version: '3.2'
+version: '3.4'
 
 services:
   sim-api:
@@ -8,6 +8,12 @@ services:
       - "5001:5001"
     networks:
       - local
+    deploy:
+      replicas: 2 
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
       
   api:
     container_name: api
@@ -19,6 +25,12 @@ services:
       - grafana
     networks: 
       - local
+    deploy:
+      replicas: 2 
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
 
   frontend:
     container_name: frontend
@@ -31,12 +43,12 @@ services:
       - prometheus
     networks: 
       - local
-
-  watchtower:
-    image: v2tec/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 30
+    deploy:
+      replicas: 2 
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
 
   prometheus:
     image: prom/prometheus:latest
@@ -74,6 +86,8 @@ services:
 
   promtail:
     image: grafana/promtail:2.0.0
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers
     command: -config.file=/etc/promtail/config.yml
     networks:
       - loki

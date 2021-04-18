@@ -8,9 +8,6 @@ on:
   push:
     branches: 
       - main
-  pull_request:
-    branches: 
-      - main
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -98,3 +95,21 @@ jobs:
             DB_PASSWORD=${{secrets.DB_PASSWORD}}
             DB_NAME=${{secrets.DB_NAME}}
             DB_PORT=${{secrets.DB_PORT}}
+
+  update_docker_swarm_services:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Executing remote command
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DROPLET_PRODUCTION_HOST }}
+        USERNAME: ${{ secrets.DROPLET_PRODUCTION_USERNAME }}
+        PORT: 22
+        KEY: ${{ secrets.DROPLET_PRODUCTION_SSHKEY }}
+        script: docker service update --image index.docker.io/minitwit/simulator minitwit_swarm_sim-api &&
+                docker service update --image index.docker.io/minitwit/api minitwit_swarm_api &&
+                docker service update --image index.docker.io/minitwit/frontend minitwit_swarm_frontend

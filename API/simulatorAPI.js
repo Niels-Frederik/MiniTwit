@@ -1,7 +1,9 @@
 const express = require("express");
 // const { Op } = require('sequelize');
 // const dotenv = require('dotenv').config();
-const db = require("./entities");
+//const db = require("./entities");
+const repo = require("./repository");
+
 // const { Sequelize } = require('sequelize');
 const url = require("url");
 const prom = require("prom-client");
@@ -80,7 +82,8 @@ function afterMiddleware(req, res) {
 
 app.get("/metrics", async (req, res, next) => {
   res.setHeader("Content-Type", register.contentType);
-  res.end(await register.metrics());
+  res.end(await register.metrics().catch(error => {res.sendStatus(500); return;})
+);
   next();
 });
 
@@ -92,16 +95,6 @@ function notReqFromSimulator(req) {
     const error = "You are not authorized to use this resource!";
     return [403, error];
   }
-}
-
-async function getUserId(username) {
-  const user = await db.Users.findOne({
-    where: {
-      username: username,
-    },
-  });
-  if (user) return user.user_id;
-  return null;
 }
 
 function updateLatest(request) {
@@ -119,32 +112,23 @@ app.post("/register", async (req, res, next) => {
   updateLatest(req);
 
   const { username, email, pwd } = req.body;
-  const userid = await getUserId(username);
+  let errorMessage;
 
-//   const requestData = req.json;
-  let error;
-
-  if (!username) error = "You have to enter a username";
-  else if (!email) error = "You have to enter an email";
-  else if (!pwd) error = "You have to enter a password";
-  else if (userid != null) error = "The username is already taken";
-  else {
-    await db.Users.create({
-      username: username,
-      email: email,
-      pw_hash: pwd,
-    });
+  try
+  {
+      errorMessage = await repo.registerUser(username, email, pwd);
+  }
+  catch (error)
+  {
+      console.error(error.message);
+      res.sendStatus(500);
+      return;
   }
 
-  if (error) {
-    res.status(400).send(error);
-    next();
-    return;
-  } else {
-    res.sendStatus(204);
-    next();
-    return;
-  }
+  if (errorMessage) res.status(400).send(errorMessage)
+  else res.sendStatus(204);
+  next();
+  return;
 });
 
 app.get("/msgs", async (req, res, next) => {
@@ -159,21 +143,8 @@ app.get("/msgs", async (req, res, next) => {
 
   let limit = req.query.no;
   if (!limit) limit = 100;
-  const result = await db.Messages.findAll({
-    include: [
-      {
-        model: db.Users,
-        attributes: [],
-      },
-    ],
-    where: {
-      flagged: 0,
-    },
-    raw: true,
-    order: [["pub_date", "DESC"]],
-    attributes: ["user.username", "text", "pub_date"],
-    limit: limit,
-  });
+  const result = await repo.simulatorGetAllMessagesAsync(limit).catch(error => {res.sendStatus(500); return;})
+  //const result = await repo.simulatorGetAllMessagesAsync(req.query.no || 100)
 
   let filteredMsgs = [];
   result.forEach((msg) => {
@@ -202,7 +173,8 @@ app.get("/msgs/:username", async (req, res, next) => {
     return;
   }
 
-  const userid = await getUserId(req.params.username);
+  const userid = await repo.getUserId(req.params.username).catch(error => {res.sendStatus(500); return;})
+
   if (!userid) {
     res.sendStatus(404);
     next();
@@ -212,22 +184,7 @@ app.get("/msgs/:username", async (req, res, next) => {
   let limit = req.query.no;
   if (!limit) limit = 100;
   let result = null;
-  result = await db.Messages.findAll({
-    include: [
-      {
-        model: db.Users,
-        attributes: [],
-      },
-    ],
-    where: {
-      flagged: 0,
-      author_Id: userid,
-    },
-    raw: true,
-    order: [["pub_date", "DESC"]],
-    attributes: ["user.username", "text", "pub_date"],
-    limit: limit,
-  });
+  result = await repo.simulatorGetUserMessagesAsync(userid, limit).catch(error => {res.sendStatus(500); return;})
 
   let filteredMsgs = [];
   result.forEach((msg) => {
@@ -257,7 +214,8 @@ app.post("/msgs/:username", async (req, res, next) => {
   }
 
   const text = req.body.content;
-  const userid = await getUserId(req.params.username);
+  const userid = await repo.getUserId(req.params.username).catch(error => {res.sendStatus(500); return;})
+
   if (userid == null || text == "") {
     console.log(
       "   - Post failed: " +
@@ -267,13 +225,8 @@ app.post("/msgs/:username", async (req, res, next) => {
     next();
     return;
   } else {
-    const date = Math.floor(Date.now() / 1000);
-    await db.Messages.create({
-      author_id: userid,
-      text: text,
-      pub_date: date,
-      flagged: 0,
-    });
+	await repo.postMessageAsync(userid, text).catch(error => {res.sendStatus(500); return;})
+
     res.sendStatus(204);
     next();
     return;
@@ -295,7 +248,8 @@ app.post("/fllws/:username", async (req, res, next) => {
     return;
   }
 
-  const userId = await getUserId(req.params.username);
+  const userId = await repo.getUserId(req.params.username).catch(error => {res.sendStatus(500); return;})
+
   console.log("Who user read from req.params.username:");
   console.log(req.params.username);
   console.log("id: ", userId);
@@ -309,7 +263,8 @@ app.post("/fllws/:username", async (req, res, next) => {
   if (Object.keys(req.body).indexOf("follow") !== -1) {
     //if we should follow the given user
     console.log("Follow request is of type follow");
-    const userToFollowId = await getUserId(req.body.follow);
+    const userToFollowId = await repo.getUserId(req.body.follow).catch(error => {res.sendStatus(500); return;})
+
     console.log("whom userId: ", userToFollowId);
     if (userToFollowId == null) {
       console.log("Whom userId was null. Sending BadRequest.");
@@ -317,10 +272,8 @@ app.post("/fllws/:username", async (req, res, next) => {
       next();
       return;
     }
-    await db.Followers.create({
-      who_id: userId,
-      whom_id: userToFollowId,
-    });
+	await repo.followUserAsync(userId, userToFollowId).catch(error => {res.sendStatus(500); return;})
+
     console.log("Follow was a success!");
     res.status(204).send("You are now following " + req.body.follow);
     next();
@@ -330,19 +283,16 @@ app.post("/fllws/:username", async (req, res, next) => {
   if (Object.keys(req.body).indexOf("unfollow") !== -1) {
     //if we should unfollow the given user
     console.log("Follow request is of type unfollow");
-    const userToUnFollowId = await getUserId(req.body.unfollow);
+    const userToUnFollowId = await repo.getUserId(req.body.unfollow).catch(error => {res.sendStatus(500); return;})
+
     if (userToUnFollowId == null) {
       console.log("Whom userId was null. Sending BadRequest");
       res.sendStatus(404, "Invalid user to unfollow");
       next();
       return;
     }
-    await db.Followers.destroy({
-      where: {
-        who_id: userId,
-        whom_id: userToUnFollowId,
-      },
-    });
+	await repo.unfollowUserAsync(userId, userToUnFollowId).catch(error => {res.sendStatus(500); return;})
+
     console.log("Unfollow was a success!");
     res.status(204).send("You have unfollowed " + req.body.unfollow);
     next();
@@ -366,7 +316,8 @@ app.get("/fllws/:username", async (req, res, next) => {
     return;
   }
 
-  const userId = await getUserId(req.params.username);
+  const userId = await repo.getUserId(req.params.username).catch(error => {res.sendStatus(500); return;})
+
 
   if (!userId) {
     res.sendStatus(404);
@@ -377,19 +328,9 @@ app.get("/fllws/:username", async (req, res, next) => {
   let limit = req.query.no;
   if (limit == null) limit == 100;
 
-  const result = await db.Followers.findAll({
-    include: {
-      model: db.Users,
-      as: "who",
-      attributes: [],
-    },
-    where: {
-      whom_id: userId,
-    },
-    attributes: ["who.username"],
-    raw: true,
-    limit: limit,
-  });
+  //exists in repo
+  const result = await repo.simulatorGetFollowersAsync(userId, limit).catch(error => {res.sendStatus(500); return;})
+
 
   let resultList = [];
   if (!result) {
@@ -407,3 +348,4 @@ app.use(afterMiddleware);
 app.listen(port, () => {
   console.log(`app listening at http://localhost:${port}`);
 });
+

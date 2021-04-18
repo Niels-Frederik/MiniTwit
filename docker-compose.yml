@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 
 services:
   sim-api:
@@ -8,6 +8,12 @@ services:
       - "5001:5001"
     networks:
       - local
+    deploy:
+      replicas: 2 
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
       
   api:
     container_name: api
@@ -19,6 +25,12 @@ services:
       - grafana
     networks: 
       - local
+    deploy:
+      replicas: 2 
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
 
   frontend:
     container_name: frontend
@@ -31,16 +43,15 @@ services:
       - prometheus
     networks: 
       - local
-
-  watchtower:
-    image: v2tec/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /root/snap/docker/796/.docker/config.json:/config.json
-    command: --interval 30
+    deploy:
+      replicas: 2 
+      update_config:
+        parallelism: 1
+        delay: 20s
+        order: start-first
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:latest
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
@@ -51,7 +62,7 @@ services:
 
 
   grafana:
-    image: grafana/grafana:4.5.2
+    image: grafana/grafana:latest
     container_name: grafana
     volumes:
       - grafana-storage:/var/lib/grafana
@@ -60,11 +71,29 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=-lEtMEIn-
     ports:
       - "3001:3000"
+    user: "104"
     networks:
       - local
+      - loki
+
+  loki:
+    image: grafana/loki:2.0.0
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - loki
+      - local
+
+  promtail:
+    image: grafana/promtail:2.0.0
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - loki
 
 networks: 
   local:
+  loki:
 
 volumes:
   grafana-storage:

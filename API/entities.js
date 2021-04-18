@@ -1,9 +1,12 @@
 const { Sequelize, DataTypes } = require('sequelize');
 // const config = require('./config.json');
 const db = {};
-// console.log(process.env.NODE_ENV)
+
 // console.log(process.env)
+
 let sequelize = 
+  process.env.NODE_ENV == 'test' ?
+	new Sequelize('sqlite::memory:', {logging: false}) :
     new Sequelize
     ({
         username: process.env.DB_USERNAME,
