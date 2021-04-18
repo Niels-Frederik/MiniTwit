@@ -112,10 +112,11 @@ app.post("/register", async (req, res, next) => {
   updateLatest(req);
 
   const { username, email, pwd } = req.body;
+  const errorMessage;
 
   try
   {
-      const errorMessage = await repo.registerUser(username, email, pwd);
+      errorMessage = await repo.registerUser(username, email, pwd);
   }
   catch (error)
   {
