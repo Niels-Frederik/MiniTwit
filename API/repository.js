@@ -192,9 +192,9 @@ async function registerUser(username, email, pwd) {
 	else if (!email) error = "You have to enter an email";
 	else if (!pwd) error = "You have to enter a password";
 	else if (userid != null) error = "The username is already taken";
-	else {
-	  await repo.createUserAsync(username, email, pwd)
-
+	else 
+	{
+	  await createUserAsync(username, email, pwd)
 	}
 	return error
 }
