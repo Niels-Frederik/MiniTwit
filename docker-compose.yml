@@ -115,6 +115,8 @@ services:
 
 networks: 
   local:
+    driver: overlay
+    attachable: true
   loki:
 
 volumes:
