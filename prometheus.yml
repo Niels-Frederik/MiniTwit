@@ -18,37 +18,13 @@ scrape_configs:
     static_configs:
       - targets: ['prometheus:9090']
   
-    # Create a job for Docker daemons.
-  - job_name: 'docker'
-    dockerswarm_sd_configs:
-      - host: /var/run/docker.sock
-        role: nodes
-    relabel_configs:
-      # Fetch metrics on port 9323.
-      - source_labels: [__meta_dockerswarm_node_address]
-        target_label: __address__
-        replacement: $1:9323
-      # Set hostname as instance label
-      - source_labels: [__meta_dockerswarm_node_hostname]
-        target_label: instance
-
-  # Create a job for Docker Swarm containers.
-  - job_name: 'dockerswarm'
-    dockerswarm_sd_configs:
-      - host: /var/run/docker.sock
-        role: tasks
-    relabel_configs:
-      # Only keep containers that should be running.
-      - source_labels: [__meta_dockerswarm_task_desired_state]
-        regex: running
-        action: keep
-      # Only keep containers that have a `prometheus-job` label.
-      - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
-        regex: .+
-        action: keep
-      # Use the prometheus-job Swarm label as Prometheus job label.
-      - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
-        target_label: job
+  - job_name: 'sim-api'
+    dns_sd_configs:
+      - names:
+          - 'tasks.minitwit_swarm_sim-api'
+        type: 'A'
+        port: 5001
+    metrics_path: '/metrics'
 
   # - job_name:       'minittwit-app'
 
