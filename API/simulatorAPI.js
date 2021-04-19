@@ -82,8 +82,7 @@ function afterMiddleware(req, res) {
 
 app.get("/metrics", async (req, res, next) => {
   res.setHeader("Content-Type", register.contentType);
-  res.end(await register.metrics().catch(error => {res.sendStatus(500); return;})
-);
+  res.end(await register.metrics())
   next();
 });
 
@@ -122,6 +121,7 @@ app.post("/register", async (req, res, next) => {
   {
       console.error(error.message);
       res.sendStatus(500);
+	  next()
       return;
   }
 
@@ -143,7 +143,18 @@ app.get("/msgs", async (req, res, next) => {
 
   let limit = req.query.no;
   if (!limit) limit = 100;
-  const result = await repo.simulatorGetAllMessagesAsync(limit).catch(error => {res.sendStatus(500); return;})
+  let result;
+
+  try {
+	result = await repo.simulatorGetAllMessagesAsync(limit)
+  }
+  catch (error) 
+  {
+	console.error(error.message)
+	res.sendStatus(500)
+	next()
+	return
+  }
   //const result = await repo.simulatorGetAllMessagesAsync(req.query.no || 100)
 
   let filteredMsgs = [];
@@ -172,8 +183,16 @@ app.get("/msgs/:username", async (req, res, next) => {
     next();
     return;
   }
-
-  const userid = await repo.getUserId(req.params.username).catch(error => {res.sendStatus(500); return;})
+  let userid
+  try {
+	userid = await repo.getUserId(req.params.username)
+  }
+  catch (error) {
+	console.error(error.message)
+	res.sendStatus(500)
+	next()
+	return
+  }
 
   if (!userid) {
     res.sendStatus(404);
@@ -183,8 +202,17 @@ app.get("/msgs/:username", async (req, res, next) => {
 
   let limit = req.query.no;
   if (!limit) limit = 100;
-  let result = null;
-  result = await repo.simulatorGetUserMessagesAsync(userid, limit).catch(error => {res.sendStatus(500); return;})
+
+  let result
+  try {
+	result = await repo.simulatorGetUserMessagesAsync(userid, limit)
+  }
+  catch (error) {
+	console.error(error.message)
+	res.sendStatus(500)
+	next()
+	return
+  }
 
   let filteredMsgs = [];
   result.forEach((msg) => {
@@ -214,7 +242,16 @@ app.post("/msgs/:username", async (req, res, next) => {
   }
 
   const text = req.body.content;
-  const userid = await repo.getUserId(req.params.username).catch(error => {res.sendStatus(500); return;})
+  let userid
+  try {
+	userid = await repo.getUserId(req.params.username)
+  }
+  catch (error) {
+	console.error(error.message)
+	res.sendStatus(500)
+	next()
+	return
+  }
 
   if (userid == null || text == "") {
     console.log(
@@ -225,7 +262,15 @@ app.post("/msgs/:username", async (req, res, next) => {
     next();
     return;
   } else {
-	await repo.postMessageAsync(userid, text).catch(error => {res.sendStatus(500); return;})
+	try {
+	  await repo.postMessageAsync(userid, text)
+	}
+	catch (error) {
+	  console.error(error.message)
+	  res.sendStatus(500)
+	  next()
+	  return
+	}
 
     res.sendStatus(204);
     next();
@@ -248,7 +293,16 @@ app.post("/fllws/:username", async (req, res, next) => {
     return;
   }
 
-  const userId = await repo.getUserId(req.params.username).catch(error => {res.sendStatus(500); return;})
+  let userId
+  try {
+	userId = await repo.getUserId(req.params.username)
+  }
+  catch (error) {
+	console.error(error.message)
+	res.sendStatus(500)
+	next()
+	return
+  }
 
   console.log("Who user read from req.params.username:");
   console.log(req.params.username);
@@ -263,7 +317,16 @@ app.post("/fllws/:username", async (req, res, next) => {
   if (Object.keys(req.body).indexOf("follow") !== -1) {
     //if we should follow the given user
     console.log("Follow request is of type follow");
-    const userToFollowId = await repo.getUserId(req.body.follow).catch(error => {res.sendStatus(500); return;})
+	let userToFollowId
+	try {
+	  userToFollowId = await repo.getUserId(req.body.follow)
+	}
+	catch (error) {
+	  console.error(error.message)
+	  res.sendStatus(500)
+	  next()
+	  return
+	}
 
     console.log("whom userId: ", userToFollowId);
     if (userToFollowId == null) {
@@ -272,7 +335,15 @@ app.post("/fllws/:username", async (req, res, next) => {
       next();
       return;
     }
-	await repo.followUserAsync(userId, userToFollowId).catch(error => {res.sendStatus(500); return;})
+	try {
+	  await repo.followUserAsync(userId, userToFollowId)
+	}
+	catch (error) {
+	  console.error(error.message)
+	  res.sendStatus(500)
+	  next()
+	  return
+	}
 
     console.log("Follow was a success!");
     res.status(204).send("You are now following " + req.body.follow);
@@ -283,7 +354,16 @@ app.post("/fllws/:username", async (req, res, next) => {
   if (Object.keys(req.body).indexOf("unfollow") !== -1) {
     //if we should unfollow the given user
     console.log("Follow request is of type unfollow");
-    const userToUnFollowId = await repo.getUserId(req.body.unfollow).catch(error => {res.sendStatus(500); return;})
+	let userToUnFollowId
+	try {
+	  userToUnFollowId = await repo.getUserId(req.body.unfollow)
+	}
+	catch (error) {
+	  console.error(error.message)
+	  res.sendStatus(500)
+	  next()
+	  return
+	}
 
     if (userToUnFollowId == null) {
       console.log("Whom userId was null. Sending BadRequest");
@@ -291,7 +371,15 @@ app.post("/fllws/:username", async (req, res, next) => {
       next();
       return;
     }
-	await repo.unfollowUserAsync(userId, userToUnFollowId).catch(error => {res.sendStatus(500); return;})
+	try {
+	  await repo.unfollowUserAsync(userId, userToUnFollowId)
+	}
+	catch (error) {
+	  console.error(error.message)
+	  res.sendStatus(500)
+	  next()
+	  return
+	}
 
     console.log("Unfollow was a success!");
     res.status(204).send("You have unfollowed " + req.body.unfollow);
@@ -316,7 +404,16 @@ app.get("/fllws/:username", async (req, res, next) => {
     return;
   }
 
-  const userId = await repo.getUserId(req.params.username).catch(error => {res.sendStatus(500); return;})
+  let userId
+  try {
+	userId = await repo.getUserId(req.params.username)
+  }
+  catch (error) {
+	console.error(error.message)
+	res.sendStatus(500)
+	next()
+	return
+  }
 
 
   if (!userId) {
@@ -328,8 +425,16 @@ app.get("/fllws/:username", async (req, res, next) => {
   let limit = req.query.no;
   if (limit == null) limit == 100;
 
-  //exists in repo
-  const result = await repo.simulatorGetFollowersAsync(userId, limit).catch(error => {res.sendStatus(500); return;})
+  let result
+  try {
+	result = await repo.simulatorGetFollowersAsync(userId, limit)
+  }
+  catch (error) {
+	console.error(error.message)
+	res.sendStatus(500)
+	next()
+	return
+  }
 
 
   let resultList = [];
