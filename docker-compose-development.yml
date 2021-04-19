@@ -3,7 +3,8 @@ version: '3.4'
 services:
   sim-api:
     container_name: sim-api
-    labels: "prometheus-job=sim-api" # prometheus only scrapes services with label prometheus-job prefix.
+    labels: 
+      - "prometheus-job=sim-api" # prometheus only scrapes services with label prometheus-job prefix.
     image: index.docker.io/minitwit/simulator_develop
     ports: 
       - "5001:5001"
