@@ -1,15 +1,17 @@
 const express = require("express");
-// const { Op } = require('sequelize');
-// const dotenv = require('dotenv').config();
-//const db = require("./entities");
+const expressWinston = require('express-winston');
+const winston = require('winston');
+const {logger, errorLogger} = require('./logger.js'); // for transports.Console
+
 const repo = require("./repository");
 
-// const { Sequelize } = require('sequelize');
 const url = require("url");
 const prom = require("prom-client");
 
 const app = express();
 const port = 5001;
+
+const router = express.Router();
 
 const register = new prom.Registry();
 const Monitor = require("./monitoring");
@@ -17,6 +19,9 @@ const monitoring = new Monitor.Monitoring(prom, register);
 
 app.use(express.json());
 app.use(beforeMiddleware);
+app.use(logger);
+
+app.use(router);
 
 function beforeMiddleware(req, res, next) {
   const route = url.parse(req.url).pathname;
@@ -80,7 +85,7 @@ function afterMiddleware(req, res) {
   else if (response[0] == "5") monitoring.server_error_response_counter.inc();
 }
 
-app.get("/metrics", async (req, res, next) => {
+router.get("/metrics", async (req, res, next) => {
   res.setHeader("Content-Type", register.contentType);
   res.end(await register.metrics())
   next();
@@ -101,13 +106,13 @@ function updateLatest(request) {
   LATEST = q == null ? LATEST : q;
 }
 
-app.get("/latest", async (req, res, next) => {
+router.get("/latest", async (req, res, next) => {
   res.json({ latest: LATEST });
   next();
   return;
 });
 
-app.post("/register", async (req, res, next) => {
+router.post("/register", async (req, res, next) => {
   updateLatest(req);
 
   const { username, email, pwd } = req.body;
@@ -131,9 +136,8 @@ app.post("/register", async (req, res, next) => {
   return;
 });
 
-app.get("/msgs", async (req, res, next) => {
+router.get("/msgs", async (req, res, next) => {
   updateLatest(req);
-
   var notFromSim = notReqFromSimulator(req);
   if (notFromSim) {
     res.status(notFromSim[0]).send(notFromSim[1]);
@@ -167,14 +171,12 @@ app.get("/msgs", async (req, res, next) => {
   });
 
   res.send(filteredMsgs);
-  console.log("Recived request for messages, and returned " + filteredMsgs.length + " messages")
-  console.error("some random error here")
-  console.warn("some random warning here")
+  logger.log('info',"Recived request for messages, and returned " + filteredMsgs.length + " messages")
   next();
   return;
 });
 
-app.get("/msgs/:username", async (req, res, next) => {
+router.get("/msgs/:username", async (req, res, next) => {
   updateLatest(req);
 
   var notFromSim = notReqFromSimulator(req);
@@ -228,9 +230,9 @@ app.get("/msgs/:username", async (req, res, next) => {
   return;
 });
 
-app.post("/msgs/:username", async (req, res, next) => {
+router.post("/msgs/:username", async (req, res, next) => {
   updateLatest(req);
-  console.log(
+  logger.log('info',
     "Received a Post to /msgs/:username with username: " + req.params.username
   );
 
@@ -254,7 +256,7 @@ app.post("/msgs/:username", async (req, res, next) => {
   }
 
   if (userid == null || text == "") {
-    console.log(
+    logger.log('info',
       "   - Post failed: " +
         (userid == null ? "user does not exist" : "message is empty: " + text)
     );
@@ -266,7 +268,7 @@ app.post("/msgs/:username", async (req, res, next) => {
 	  await repo.postMessageAsync(userid, text)
 	}
 	catch (error) {
-	  console.error(error.message)
+	  logger.log('error',error.message)
 	  res.sendStatus(500)
 	  next()
 	  return
@@ -278,16 +280,13 @@ app.post("/msgs/:username", async (req, res, next) => {
   }
 });
 
-app.post("/fllws/:username", async (req, res, next) => {
+router.post("/fllws/:username", async (req, res, next) => {
   updateLatest(req);
-  console.log("Recieved a Post follow request:");
-  console.log("request body: ", req.body);
-  console.log("requst params: ", req.params);
+  logger.log('info',`Recieved a Post follow request:\n request body:  ${JSON.stringify(req.body)}\n requst params: ${JSON.stringify(req.params)}`);
 
   const notReqFromSim = notReqFromSimulator(req);
 
   if (notReqFromSim) {
-    console.log("Request was not from simulator. Sending BadRequest");
     res.status(notReqFromSim[0]).send(notReqFromSim[1]);
     next();
     return;
@@ -304,11 +303,7 @@ app.post("/fllws/:username", async (req, res, next) => {
 	return
   }
 
-  console.log("Who user read from req.params.username:");
-  console.log(req.params.username);
-  console.log("id: ", userId);
   if (!userId) {
-    console.log("Who userId was null. Sending BadRequest");
     res.sendStatus(404);
     next();
     return;
@@ -316,7 +311,6 @@ app.post("/fllws/:username", async (req, res, next) => {
 
   if (Object.keys(req.body).indexOf("follow") !== -1) {
     //if we should follow the given user
-    console.log("Follow request is of type follow");
 	let userToFollowId
 	try {
 	  userToFollowId = await repo.getUserId(req.body.follow)
@@ -328,9 +322,7 @@ app.post("/fllws/:username", async (req, res, next) => {
 	  return
 	}
 
-    console.log("whom userId: ", userToFollowId);
     if (userToFollowId == null) {
-      console.log("Whom userId was null. Sending BadRequest.");
       res.status(404).send("Invalid user to follow");
       next();
       return;
@@ -345,7 +337,6 @@ app.post("/fllws/:username", async (req, res, next) => {
 	  return
 	}
 
-    console.log("Follow was a success!");
     res.status(204).send("You are now following " + req.body.follow);
     next();
     return;
@@ -353,7 +344,6 @@ app.post("/fllws/:username", async (req, res, next) => {
 
   if (Object.keys(req.body).indexOf("unfollow") !== -1) {
     //if we should unfollow the given user
-    console.log("Follow request is of type unfollow");
 	let userToUnFollowId
 	try {
 	  userToUnFollowId = await repo.getUserId(req.body.unfollow)
@@ -366,7 +356,6 @@ app.post("/fllws/:username", async (req, res, next) => {
 	}
 
     if (userToUnFollowId == null) {
-      console.log("Whom userId was null. Sending BadRequest");
       res.sendStatus(404, "Invalid user to unfollow");
       next();
       return;
@@ -381,19 +370,14 @@ app.post("/fllws/:username", async (req, res, next) => {
 	  return
 	}
 
-    console.log("Unfollow was a success!");
     res.status(204).send("You have unfollowed " + req.body.unfollow);
     next();
     return;
   }
-  console.log(
-    "We should not have ended here... Only within one of the if-branches!"
-  );
-  console.log();
   next();
 });
 
-app.get("/fllws/:username", async (req, res, next) => {
+router.get("/fllws/:username", async (req, res, next) => {
   updateLatest(req);
 
   const notReqFromSim = notReqFromSimulator(req);
@@ -449,6 +433,8 @@ app.get("/fllws/:username", async (req, res, next) => {
 });
 
 app.use(afterMiddleware);
+
+app.use(errorLogger);
 
 app.listen(port, () => {
   console.log(`app listening at http://localhost:${port}`);
