@@ -20,7 +20,8 @@ let sequelize =
             require: true,
             rejectUnauthorized: false
             }
-        }
+        },
+        logging: false
     })
 
 const Users = sequelize.define('user', {
