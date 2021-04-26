@@ -124,10 +124,8 @@ router.post("/register", async (req, res, next) => {
   }
   catch (error)
   {
-      console.error(error.message);
-      res.sendStatus(500);
-	  next()
-      return;
+    res.sendStatus(500);
+    return next(error)
   }
 
   if (errorMessage) res.status(400).send(errorMessage)
@@ -154,10 +152,8 @@ router.get("/msgs", async (req, res, next) => {
   }
   catch (error) 
   {
-	console.error(error.message)
 	res.sendStatus(500)
-	next()
-	return
+	return next(error)
   }
   //const result = await repo.simulatorGetAllMessagesAsync(req.query.no || 100)
 
@@ -190,10 +186,8 @@ router.get("/msgs/:username", async (req, res, next) => {
 	userid = await repo.getUserId(req.params.username)
   }
   catch (error) {
-	console.error(error.message)
 	res.sendStatus(500)
-	next()
-	return
+	return next(error)
   }
 
   if (!userid) {
@@ -210,10 +204,8 @@ router.get("/msgs/:username", async (req, res, next) => {
 	result = await repo.simulatorGetUserMessagesAsync(userid, limit)
   }
   catch (error) {
-	console.error(error.message)
 	res.sendStatus(500)
-	next()
-	return
+	return next(error)
   }
 
   let filteredMsgs = [];
@@ -249,10 +241,8 @@ router.post("/msgs/:username", async (req, res, next) => {
 	userid = await repo.getUserId(req.params.username)
   }
   catch (error) {
-	console.error(error.message)
 	res.sendStatus(500)
-	next()
-	return
+	return next(error)
   }
 
   if (userid == null || text == "") {
@@ -268,10 +258,8 @@ router.post("/msgs/:username", async (req, res, next) => {
 	  await repo.postMessageAsync(userid, text)
 	}
 	catch (error) {
-	  logger.log('error',error.message)
 	  res.sendStatus(500)
-	  next()
-	  return
+	  return next(error)
 	}
 
     res.sendStatus(204);
@@ -297,10 +285,8 @@ router.post("/fllws/:username", async (req, res, next) => {
 	userId = await repo.getUserId(req.params.username)
   }
   catch (error) {
-	console.error(error.message)
 	res.sendStatus(500)
-	next()
-	return
+	return next(error)
   }
 
   if (!userId) {
@@ -316,10 +302,8 @@ router.post("/fllws/:username", async (req, res, next) => {
 	  userToFollowId = await repo.getUserId(req.body.follow)
 	}
 	catch (error) {
-	  console.error(error.message)
 	  res.sendStatus(500)
-	  next()
-	  return
+	  return next(error)
 	}
 
     if (userToFollowId == null) {
@@ -331,10 +315,8 @@ router.post("/fllws/:username", async (req, res, next) => {
 	  await repo.followUserAsync(userId, userToFollowId)
 	}
 	catch (error) {
-	  console.error(error.message)
 	  res.sendStatus(500)
-	  next()
-	  return
+	  return next(error)
 	}
 
     res.status(204).send("You are now following " + req.body.follow);
@@ -349,10 +331,8 @@ router.post("/fllws/:username", async (req, res, next) => {
 	  userToUnFollowId = await repo.getUserId(req.body.unfollow)
 	}
 	catch (error) {
-	  console.error(error.message)
 	  res.sendStatus(500)
-	  next()
-	  return
+	  return next(error)
 	}
 
     if (userToUnFollowId == null) {
@@ -364,10 +344,8 @@ router.post("/fllws/:username", async (req, res, next) => {
 	  await repo.unfollowUserAsync(userId, userToUnFollowId)
 	}
 	catch (error) {
-	  console.error(error.message)
 	  res.sendStatus(500)
-	  next()
-	  return
+	  return next(error)
 	}
 
     res.status(204).send("You have unfollowed " + req.body.unfollow);
@@ -393,10 +371,8 @@ router.get("/fllws/:username", async (req, res, next) => {
 	userId = await repo.getUserId(req.params.username)
   }
   catch (error) {
-	console.error(error.message)
 	res.sendStatus(500)
-	next()
-	return
+	return next(error)
   }
 
 
@@ -414,10 +390,8 @@ router.get("/fllws/:username", async (req, res, next) => {
 	result = await repo.simulatorGetFollowersAsync(userId, limit)
   }
   catch (error) {
-	console.error(error.message)
 	res.sendStatus(500)
-	next()
-	return
+	return next(error)
   }
 
 
