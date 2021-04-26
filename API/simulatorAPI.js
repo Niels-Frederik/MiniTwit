@@ -1,7 +1,10 @@
 const express = require("express");
 const expressWinston = require('express-winston');
 const winston = require('winston');
-const {logger, errorLogger} = require('./logger'); // for transports.Console
+//const {logger, errorLogger} = require('./logger'); // for transports.Console
+const customLogger = require('./logger')
+const logger = customLogger.logger
+const errorLogger = customLogger.errorLogger
 
 const repo = require("./repository");
 
