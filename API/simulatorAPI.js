@@ -1,11 +1,7 @@
 const express = require("express");
 const expressWinston = require('express-winston');
 const winston = require('winston');
-//const {logger, errorLogger} = require('./logger'); // for transports.Console
-const customLogger = require('./logger')
-const logger = customLogger.logger
-const errorLogger = customLogger.errorLogger
-
+const {logger, errorLogger, customLogger} = require('./logger.js'); // for transports.Console
 const repo = require("./repository");
 
 const url = require("url");
@@ -170,7 +166,7 @@ router.get("/msgs", async (req, res, next) => {
   });
 
   res.send(filteredMsgs);
-  logger.log('info',"Recived request for messages, and returned " + filteredMsgs.length + " messages")
+  customLogger.log('info',"Recived request for messages, and returned " + filteredMsgs.length + " messages")
   next();
   return;
 });
@@ -227,7 +223,7 @@ router.get("/msgs/:username", async (req, res, next) => {
 
 router.post("/msgs/:username", async (req, res, next) => {
   updateLatest(req);
-  logger.log('info',
+  customLogger.log('info',
     "Received a Post to /msgs/:username with username: " + req.params.username
   );
 
@@ -249,7 +245,7 @@ router.post("/msgs/:username", async (req, res, next) => {
   }
 
   if (userid == null || text == "") {
-    logger.log('info',
+    customLogger.log('info',
       "   - Post failed: " +
         (userid == null ? "user does not exist" : "message is empty: " + text)
     );
@@ -273,7 +269,7 @@ router.post("/msgs/:username", async (req, res, next) => {
 
 router.post("/fllws/:username", async (req, res, next) => {
   updateLatest(req);
-  logger.log('info',`Recieved a Post follow request:\n request body:  ${JSON.stringify(req.body)}\n requst params: ${JSON.stringify(req.params)}`);
+  customLogger.log('info',`Recieved a Post follow request:\n request body:  ${JSON.stringify(req.body)}\n requst params: ${JSON.stringify(req.params)}`);
 
   const notReqFromSim = notReqFromSimulator(req);
 
