@@ -91,14 +91,6 @@ async function getUserId(username) {
 }
 
 async function createUserAsync(username, email, pwhash) {
-    const existingUser = await db.Users.findOne({
-        where: {
-            email: email
-        }
-    });
-    if (existingUser) {
-        return undefined;
-    }
     return await db.Users.create({
         username: username,
         email: email,
@@ -124,11 +116,6 @@ async function getIsWhoFollowingWhomAsync(whoId, whomId) {
         raw: true,
         attributes:  ['whom_id']
     });
-
-    if (follower) {
-        return true;
-    }
-    return false;
 }
 
 async function simulatorGetAllMessagesAsync(limit) {
