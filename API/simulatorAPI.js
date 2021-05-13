@@ -1,6 +1,4 @@
 const express = require("express");
-const expressWinston = require('express-winston');
-const winston = require('winston');
 const {logger, errorLogger, customLogger} = require('./logger.js'); // for transports.Console
 const repo = require("./repository");
 
@@ -119,7 +117,7 @@ router.post("/register", async (req, res, next) => {
 
   try
   {
-      errorMessage = await repo.registerUser(username, email, pwd);
+      errorMessage = await repo.registerUserAsync(username, email, pwd);
   }
   catch (error)
   {
@@ -182,7 +180,7 @@ router.get("/msgs/:username", async (req, res, next) => {
   }
   let userid
   try {
-	userid = await repo.getUserId(req.params.username)
+	userid = await repo.getUserIdAsync(req.params.username)
   }
   catch (error) {
 	res.sendStatus(500)
@@ -237,7 +235,7 @@ router.post("/msgs/:username", async (req, res, next) => {
   const text = req.body.content;
   let userid
   try {
-	userid = await repo.getUserId(req.params.username)
+	userid = await repo.getUserIdAsync(req.params.username)
   }
   catch (error) {
 	res.sendStatus(500)
@@ -281,7 +279,7 @@ router.post("/fllws/:username", async (req, res, next) => {
 
   let userId
   try {
-	userId = await repo.getUserId(req.params.username)
+	userId = await repo.getUserIdAsync(req.params.username)
   }
   catch (error) {
 	res.sendStatus(500)
@@ -298,7 +296,7 @@ router.post("/fllws/:username", async (req, res, next) => {
     //if we should follow the given user
 	let userToFollowId
 	try {
-	  userToFollowId = await repo.getUserId(req.body.follow)
+	  userToFollowId = await repo.getUserIdAsync(req.body.follow)
 	}
 	catch (error) {
 	  res.sendStatus(500)
@@ -327,7 +325,7 @@ router.post("/fllws/:username", async (req, res, next) => {
     //if we should unfollow the given user
 	let userToUnFollowId
 	try {
-	  userToUnFollowId = await repo.getUserId(req.body.unfollow)
+	  userToUnFollowId = await repo.getUserIdAsync(req.body.unfollow)
 	}
 	catch (error) {
 	  res.sendStatus(500)
@@ -367,7 +365,7 @@ router.get("/fllws/:username", async (req, res, next) => {
 
   let userId
   try {
-	userId = await repo.getUserId(req.params.username)
+	userId = await repo.getUserIdAsync(req.params.username)
   }
   catch (error) {
 	res.sendStatus(500)
