@@ -3,13 +3,14 @@ const { Op } = require('sequelize');
 
 async function getTimelineAsync(userId, per_page) {
 
-    const followedId = await db.Followers.findAll({
+  const followedId = await db.Followers.findAll({
 		where: {
 			who_id: userId
 		},
 		raw: true,
 		attributes:  ['whom_id']
-	}).then(e => e.map(v => v.whom_id))
+	}).then(e => e.map(v => v.whom_id));
+
 	const result = await db.Messages.findAll({
 		include: [{
 			model: db.Users,
@@ -46,7 +47,6 @@ async function getPublicTimelineAsync(per_page) {
 		attributes: ['user.username', 'text', 'pub_date'],
 		limit: per_page
 	});
-
 	return {"messages": result, "followedOptions": -1};
 }
 
@@ -84,7 +84,7 @@ async function findByUsernameAsync(username) {
 	});
 }
 
-async function getUserId(username) {
+async function getUserIdAsync(username) {
 	const user = await findByUsernameAsync(username)
 	if (user) return user.user_id
 	return null
@@ -184,7 +184,7 @@ async function simulatorGetFollowersAsync(userId, limit) {
       });
 }
 
-async function registerUser(username, email, pwd) {
+async function registerUserAsync(username, email, pwd) {
 	const userid = await findByUsernameAsync(username);
 	let error;
 	  
@@ -206,10 +206,10 @@ module.exports = {
     unfollowUserAsync,
     postMessageAsync,
     findByUsernameAsync,
-	getUserId,
+	  getUserIdAsync,
     createUserAsync,
     getMessagesAsync,
-	registerUser,
+	  registerUserAsync,
     getIsWhoFollowingWhomAsync,
     simulatorGetAllMessagesAsync,
     simulatorGetFollowersAsync,
