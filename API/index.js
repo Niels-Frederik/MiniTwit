@@ -1,21 +1,24 @@
 const express = require("express");
 const bcrypt = require('bcrypt');
-// const dotenv = require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const cookie_parser = require('cookie-parser')
 const cors = require('cors')
-
-const { Op } = require('sequelize');
-const db = require('./entities');
+const repository = require('./repository')
 const prom = require('prom-client');
+const {logger, errorLogger, customLogger} = require('./logger.js'); // for transports.Console
+
 const register = new prom.Registry();
 
 const app = express();
 const port = 5000;
+const router = express.Router();
+
 app.use(cookie_parser())
 app.use(express.json())
 app.use(cors({ origin: true, credentials: true }))
 app.use(myMiddleware)
+app.use(logger);
+app.use(router);
 
 register.setDefaultLabels({
   app: 'minitwit'
@@ -27,20 +30,15 @@ const request_counter = new prom.Counter({
   help: 'metric_help',
   registers: [register],
 });
+
 register.registerMetric(request_counter)
-
-//const AggregatorRegistry = prom.AggregatorRegistry
-//AggregatorRegistry.setRegistries(register);
-
 
 function myMiddleware(req, res, next) {
   request_counter.inc();
-  //const count = await response_counter.get()
-  //console.log('Det her er vores request counter: ' + JSON.stringify(count))
   next()
 }
 
-app.get('/metrics', async(req, res) =>
+router.get('/metrics', async(req, res) =>
 {
 	res.setHeader('Content-Type', register.contentType)
 	res.end(await register.metrics())
@@ -49,96 +47,35 @@ app.get('/metrics', async(req, res) =>
 //Shows a users timeline or if no user is logged in it will
 //redirect to the public timeline.  This timeline shows the user's
 //messages as well as all the messages of followed users
-app.get('/', async (req, res) => {
+router.get('/', async (req, res) => {
 
     const userId = await getUserIdFromJwtToken(req);
     if (userId == null) res.redirect("public_timeline")
     else res.redirect("timeline");
 })
 
-app.get('/timeline', async(req,res) =>
+router.get('/timeline', async(req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
 	if (userId == null) 
 	{
-		//res.send()
 		res.redirect('public_timeline');
 		return
 	}
-	const PER_PAGE = 30;
-	// exists in repo
-	const followedId = await db.Followers.findAll({
-		where: {
-			who_id: userId
-		},
-		raw: true,
-		attributes:  ['whom_id']
-	}).then(e => e.map(v => v.whom_id))
-	const result = await db.Messages.findAll({
-		include: [{
-			model: db.Users,
-			attributes: []
-		}],
-		/*
-		include: [{
-			model: db.Followers,
-			attributes: []
-			required: false //for left join
-		}],
-		*/
-		where: {
-			[Op.and]: [
-				{ flagged: 0 }, 
-				{ [Op.or]: [ 
-					{ '$user.user_id$': userId, },
-					{ '$user.user_id$': followedId} 
-				]},
-			]
-		},
-		raw: true,
-		order: [['pub_date', 'DESC']],
-		attributes: ['user.username', 'text', 'pub_date'],
-		limit: PER_PAGE
-	})
-    //res.setHeader("")
-    //res.header("Access-Control-Allow-Origin", "*");
-    //res.status(200).send(JSON.stringify(result))
 
-	const obj = {"messages": result, "followedOptions": -1}
-    res.send(obj)
+	result = await repository.getTimelineAsync(userId, 30)
+	res.send(result)
 })
   
 //Displays the latest messages of all users
-app.get('/public_timeline', async (req,res) =>
+router.get('/public_timeline', async (req,res) =>
 {
-    const remoteAddress = req.socket.remoteAddress;
-    const ip = remoteAddress.replace(/^.*:/, '');
-    console.log("We got a visitor from: " + ip);
-
-    const PER_PAGE = 30;
-
-	// exists in repo
-	const result = await db.Messages.findAll({
-		include: [{
-			model: db.Users, 
-			attributes: []
-		}],
-		where: {
-			flagged: 0
-		},
-		raw: true,
-		order: [['pub_date', 'DESC']],
-		attributes: ['user.username', 'text', 'pub_date'],
-		limit: PER_PAGE
-	})
-
-	const obj = {"messages": result, "followedOptions": -1}
-
-    res.send(obj);
+	result = await repository.getPublicTimelineAsync(30)
+    res.send(result);
 })
 
 //Displays a users tweets
-app.post('/:username/follow', async (req,res) =>
+router.post('/:username/follow', async (req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req)
 	if (userId == null) 
@@ -146,23 +83,18 @@ app.post('/:username/follow', async (req,res) =>
 		res.sendStatus(401)
 		return
 	}
-	const whomId = await getUserId(req.params.username)
+	const whomId = await repository.getUserIdAsync(req.params.username)
 	if (whomId == null) 
 	{
 		res.sendStatus(404)
 		return
 	}
-	console.log(userId)
-	// exists in repo
-	await db.Followers.create({
-		who_id: userId,
-		whom_id: whomId
-	})
+
+	await repository.followUserAsync(userId, whomId)
     res.status(200).send("You are now following " + req.params.username)
-	//res.redirect()
 })
 
-app.delete('/:username/unfollow', async (req,res) =>
+router.delete('/:username/unfollow', async (req,res) =>
 {
 	const userId = await getUserIdFromJwtToken(req)
 	if (userId == null)
@@ -170,24 +102,19 @@ app.delete('/:username/unfollow', async (req,res) =>
 		res.sendStatus(401)
 		return
 	}
-	const whomId = await getUserId(req.params.username)
+
+	const whomId = await repository.getUserIdAsync(req.params.username)
 	if (whomId == null) 
 	{
 		res.sendStatus(404)
 		return
 	}
-	//exists in repo
-	await db.Followers.destroy({
-		where: {
-			who_id: userId,
-			whom_id: whomId
-		}
-	})
+
+	await repository.unfollowUserAsync(userId, whomId)
 	res.status(200).send("You are no longer following " + req.params.username)
-	//res.redirect()
 })
 
-app.post('/add_message', async (req,res) =>
+router.post('/add_message', async (req,res) =>
 {
     const userId = await getUserIdFromJwtToken(req);
     const text = req.body.text;
@@ -195,31 +122,19 @@ app.post('/add_message', async (req,res) =>
         res.sendStatus(400);
         return;
     } else {
-		// exists in repo postMessage
-		const date = (Math.floor(Date.now()/1000))
-		await db.Messages.create({
-			author_id: userId,
-			text: text,
-			pub_date: date,
-			flagged: 0
-		})
+		await repository.postMessageAsync(userId, text)
         res.sendStatus(200)
     }
 })
 
-app.post('/login', async (req,res) =>
+router.post('/login', async (req,res) =>
 {
     const username = req.body.username
     const password = req.body.password
 
     if (!(username && password)) res.sendStatus(400)
 
-	// exists in repo findByUsernameAsync
-	const row = await db.Users.findOne({
-		where: {
-			username: username
-		}
-	})
+	const row = await repository.findByUsernameAsync(username)
 
     if (!row) 
     {
@@ -255,7 +170,7 @@ app.post('/login', async (req,res) =>
     }
 })
 
-app.post('/register', async (req,res) =>
+router.post('/register', async (req,res) =>
 {
     const username = req.body.username
     const email = req.body.email
@@ -267,7 +182,7 @@ app.post('/register', async (req,res) =>
     //Check if any users with that username already exists
 
 	//exists in repo
-	const userid = await getUserId(username)
+	const userid = await repository.getUserIdAsync(username)
     
     //A user already exists
     if (userid)
@@ -279,12 +194,7 @@ app.post('/register', async (req,res) =>
         try
         {
             const pw_hash = await bcrypt.hash(req.body.password, 10)
-			// exists in repo
-			await db.Users.create({
-				username: username,
-				email: email,
-				pw_hash: pw_hash
-			});
+			await repository.registerUserAsync(username, email, pw_hash)
             res.sendStatus(200)
         }
         catch 
@@ -294,17 +204,16 @@ app.post('/register', async (req,res) =>
     }
 })
     
-app.get('/logout', (req,res) =>
+router.get('/logout', (req,res) =>
 {
 	res.clearCookie('accessToken')
 	res.redirect('/public_timeline');
 	return
 })
 
-app.get('/:username', async (req,res) =>
+router.get('/:username', async (req,res) =>
 {
-	// replace with repo getUserId
-    const whomId = await getUserId(req.params.username)
+    const whomId = await repository.getUserIdAsync(req.params.username)
 	const userId = await getUserIdFromJwtToken(req)
 
     if (whomId == null) 
@@ -314,27 +223,14 @@ app.get('/:username', async (req,res) =>
     }
 
 	//exists in repo
-	const messages = await db.Messages.findAll({
-		where: {
-			author_id: whomId
-		},
-		attributes: ["text", "pub_date"]
-	});
-
+	const messages = await repository.getMessagesAsync(whomId);
 
     if (messages) {
 
 		var m = []
 
 		//exists in repo isWhoFollowingWhom
-		const followed = await db.Followers.findOne({
-			where: {
-				who_id: userId,
-				whom_id: whomId 
-			},
-			raw: true,
-			attributes:  ['whom_id']
-		})
+		const followed = await repository.getIsWhoFollowingWhomAsync(userId, whomId);
 
 		var followedOptions = 0
 		if (whomId == userId) followedOptions = 0
@@ -369,11 +265,10 @@ async function getUserIdFromJwtToken(req)
 {
 	const token = req.cookies.accessToken
     if (token == null || token == undefined) return null
-
     try 
     {
         const verifiedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-		return await getUserId(verifiedToken.username)
+		return await repository.getUserIdAsync(verifiedToken.username)
     }
     catch
     {
@@ -381,18 +276,7 @@ async function getUserIdFromJwtToken(req)
     }
 }
 
-//TODO replace with repo function
-async function getUserId(username)
-{
-	//exists in repo
-	const user = await db.Users.findOne({
-		where: {
-			username: username
-		}
-	});
-	if (user) return user.user_id
-	return null;
-}
+app.use(errorLogger);   
 
 app.listen(port, () => {
     console.log(`app listening at http://localhost:${port}`)
