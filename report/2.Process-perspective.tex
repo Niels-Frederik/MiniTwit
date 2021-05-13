@@ -1,0 +1,34 @@
+\section{Process' perspective}
+
+\subsection{Team organization and interaction}
+The team created a Discord channel to function as the main communication channel throughout the project. Here, the team met each Monday after the lecture to discuss what work had been completed since last week, what work had to be completed by the end of the current week, and who should do which tasks. \\
+The team used Jira's Kanban Board feature\cite{jira} to gain a better overview of the various tasks. The Kanban consisted of the following columns: "To Do", "In Progress", and "Done". Hence, the team could move the tasks to the corresponding status of its progress, such that the state was visible to the rest of the team members.
+
+\subsection{A complete description of stages and tools included in the CI/CD chains.}
+Rolling updates with --update-order set to start-first
+
+
+\subsection{Organization of your repositor(ies)}
+The MiniTwit application was built using a mono-repository on GitHub. The structure in the Repository consisted of a sub-folder for the API (API for the front end and the Simulator API), a sub-folder for the Frontend React Application, and a sub-folder for the report written in Latex. 
+
+\subsection{Applied branching strategy}
+The team applied the task-branching strategy\cite{branching} together with having both a Main and Develop branch. The Develop branch was initially a mirror of the Main branch and is where new functionality is developed and tested. Once a task is created on Jira and a team member has been assigned to develop it, the developer will create a branch with the task-name off of the Develop branch. Once completed and tested successfully the branch is merged into Develop. Finally, Develop was merged into Main once a week. However, this was not happening weekly in the first weeks of the project due to the team being behind schedule. 
+
+\subsection{Applied development process and tools supporting it}
+The team tried to use pair-programming as much as possible as opposed to assigning each member with their own task. Pair programming was preferred to allow most possible members to get hands on experience with the various DevOps themes and to enhance code quality. To facilitate pair-programming, the team utilized Discord's screen sharing functionality as well as Visual Studio Code's Live Share functionality\cite{live_share}. While screen sharing functionality is self-explanatory, the Live Share functionality provided a way for multiple developers to work on the documents simultaneously. 
+
+\subsection{How do you monitor your systems and what precisely do you monitor?}
+Yarl
+
+\subsection{What do you log in your systems and how do you aggregate logs?}
+Norton
+
+\subsection{Brief results of the security assessment}
+Running NMAP showed the following open ports and services:
+
+None of these have 
+
+\subsection{Applied strategy for scaling and load balancing}
+As already mentioned, the system is hosted in Docker swarm mode with two nodes running on their own droplet in the network. The docker swarm scales horizontally, as more worker nodes running on their own physical machine can join the swarm if the swarm were to be scaled. \\
+\\
+With swarm comes load balancing out of the box. The ingress network exposes the services on the swarm via the routing mesh. The load balancer decides which of the running instances of the requested service the request should end up at\cite{docker-ingress}. This is seen in figure \ref{fig:arcitechture-overview} where an incoming request to the load balancer on the \textit{manager-node-01} droplet is redirected to a container running within the \textit{Minitwit} component of the \textit{worker-node-01} droplet.
