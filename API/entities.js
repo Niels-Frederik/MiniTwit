@@ -1,9 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
-// const config = require('./config.json');
 const db = {};
-
-// console.log(process.env)
-
+if (process.env.NODE_ENV != "production") {require('dotenv').config();}
 let sequelize = 
   process.env.NODE_ENV == 'test' ?
 	new Sequelize('sqlite::memory:', {logging: false}) :
