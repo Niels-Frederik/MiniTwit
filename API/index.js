@@ -63,14 +63,14 @@ router.get('/timeline', async(req,res) =>
 		return
 	}
 
-	result = await repository.getTimelineAsync(userId, 30)
+	const result = await repository.getTimelineAsync(userId, 30)
 	res.send(result)
 })
   
 //Displays the latest messages of all users
 router.get('/public_timeline', async (req,res) =>
 {
-	result = await repository.getPublicTimelineAsync(30)
+	const result = await repository.getPublicTimelineAsync(30)
     res.send(result);
 })
 
