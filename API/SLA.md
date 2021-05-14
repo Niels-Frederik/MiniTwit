@@ -10,10 +10,10 @@ The SLA will be updated on a recurring basis, but your version only renews to th
 
 ## General Terms
 
-API: Application Programming Interface.
-Total Transaction Attempts: Total number of requests each month to the API by the user.
-Failed transactions: Transactions returning a server-side 5xx error message from a request.
-Monthly Uptime Percentage: (Total Transaction Attempts - Failed Transactions) / Total Transaction Attempts
+* API: Application Programming Interface.
+* Total Transaction Attempts: Total number of requests each month to the API by the user.
+* Failed transactions: Transactions returning a server-side 5xx error message from a request.
+* Monthly Uptime Percentage: (Total Transaction Attempts - Failed Transactions) / Total Transaction Attempts
 
 ## SLA details
 
