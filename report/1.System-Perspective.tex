@@ -1,6 +1,10 @@
 \section{System's Perspective}
-\subsection{Architecture of your ITU-MiniTwit systems}
-Below is a deployment diagram showing the system's architecture:
+%The report doesn't need to be structured in subsections to answer each question. The most important is that all these questions are answered in some way throughout the System's perspective section.
+
+\subsection{Architecture and Design}
+
+\subsubsection{Overview}
+Below is a deployment diagram of the system:
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1.2\linewidth]{report/images/system-architecture.png}
@@ -8,28 +12,112 @@ Below is a deployment diagram showing the system's architecture:
     \label{fig:arcitechture-overview}
 \end{figure}
 
-The MiniTwit application runs on two droplets on Digital Ocean. A managed database hosted by Digital Ocean is used to host a Postgres database. The \textit{manager-node-01} droplet is running Docker swarm mode and is the swarm manager and leader\cite{docker-swarm}. The \textit{workder-node-01} is a worker node within the swarm. The MiniTwit application itself is grouped into the Minitwit component. The swarm hosts the Minitwit component in two replica. The swarm also hosts monitoring and logging services each in one replica. The monitoring and logging stack consists of Promtail to perform log aggregation, Loki to store and enable log query, Prometheus to collect and perform metric querying and finally Grafana to display the monitored and logged data. \\
+Green arrow: database connection\\
+
+The MiniTwit application runs on two droplets on Digital Ocean. A managed database hosted by Digital Ocean is used to host a Postgres database. The \textit{production-worker} droplet is running Docker swarm mode and is a swarm manager \cite{docker-swarm}. The \textit{minitwit-webserver} droplet is a worker node within the swarm. The MiniTwit application itself is grouped into the Minitwit component. The swarm hosts the Minitwit component in four replicas. The swarm also hosts the monitoring and logging stack one replica. The monitoring and logging stack consists of Promtail to perform log aggregation, Loki to store and enable log query, Prometheus to collect and perform metric querying and finally Grafana to display the monitored and logged data. The swarm is run with a docker-compose.yml, which can be seen in appendix \ref{appendix:docker-compose}. \\
+Furthermore, the swarm uses Dockerhub to pull all images for the services.
 \\
 Below is a decomposition of the Minitwit component:
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=1\linewidth]{report/images/minitwit-decomposition.png}
+    \includegraphics[width=1.1\linewidth]{report/images/minitwit-decomposition.png}
     \caption{MiniTwit Component Decomposition}
     \label{fig:arcitechture-overview}
 \end{figure}
 
-The Minitwit component is an abstraction to increase readability in the UML drawing and is therefore not a single container hosted in the swarm. The component consists of the front-end, API for the simulator (Sim-Api) and the API for the front-end.
+The Minitwit component is an abstraction to increase readability in the UML drawing and is therefore not a single container hosted in the swarm. The component consists of the front-end, API for the simulator (Sim-Api) and the API for the front-end. The simulator uses the \textit{Sim-API} service and the \textit{Frontend} uses the \textit{API} service.
 
-\subsection{Design of your ITU-MiniTwit systems}
-The \textit{Frontend} is written in React JS. Both the \textit{Sim-API} and \textit{API} are written in Node.js using ExpressJS and implemented as a RESTful API. 
-\todo{hvad skal der egentligt stå her???}
+\subsubsection{Design choices}
 
-\subsection{All dependencies of your ITU-MiniTwit systems on all levels of abstraction and development stages.}
-\subsubsection{That is, list and briefly describe all technologies
-and tools you applied and depend on.}
-\todo{Hvad søren mener i TAs?}
+%TA used 3+1 view model. 
+%Deployment diagram should be enough. 
+%Maybe add package diagram - of how the api works with the different components.
+
+
+The \textit{Frontend} service is written in React.js. Both the \textit{Sim-API} and \textit{API} are API's running on Node.js and exposes a RESTful API implemented with Express.js. \\
+The rationale behind using javascript for both the front-end and back-end was that all of the team members were experienced with javascript. It is also a light weight solution compared to a C\# implementation which is much more complex in terms of sub modules and interfaces. Also, developing with javascript is quick as each change in the source code is re-compiled in run-time during development, making debugging very easy.\\
+\\
+Below is a component diagram of the back-end illustrating the simplicity:
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{report/images/component-diagram.png}
+    \caption{Back-end Component diagram}
+    \label{fig:back-end-component-diagram}
+\end{figure}
+
+Each component in the back-end is one single file and there are no interfaces. Both APIs implements the endpoints and uses the rest of the components as helpers to resolve each request.\\
+The following list breifly describes each component:
+\begin{enumerate}
+    \item Monitoring: Provides functionality to use metrics used for Prometheus
+    \item Logger: Provides logger objects to perform logging
+    \item Repository: Provides an object to query the database
+    \item DB Handler: Provides a database object with the database connection and schema.
+\end{enumerate}
+
+A Postgres database was chosen as all of the team members had previous experience using it and because it is a relational database, which fits the purpose of this project.
+
+%How the system is designed. The choices of the design through out the project. 
+%Why is the structure this way.. Like load balance. 
+%How is the system structured. Hvordan hænger det hele sammen.
+%Architecture and design...
+%samle 1.1 og 1.2
+\newpage
+\subsection{Dependencies}
+
+\subsubsection{Front-end and back-end low level diagrams}
+The following is a description of the UML syntax used in the next UML diagrams:
+\begin{enumerate}
+    \item Squares: files that the team developed
+    \item Circles: external libraries
+    \item Arrow: build-/compile-time dependency
+    \item Dashed arrow: run-time dependency
+\end{enumerate}
+
+The front-end has the following dependencies:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{report/images/Frontend-dependencies.png}
+    \caption{Front-end dependency diagram}
+    \label{fig:front-end-depencency-diagram}
+\end{figure}
+The squares are here components. Colors have here been used to improve the readability by each component having their own color. 
+
+\newpage
+The back-end has the following dependencies:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{report/images/backend-dependencies.png}
+    \caption{Back-end dependency diagram}
+    \label{fig:back-end-depencency-diagram}
+\end{figure}
+
+\subsubsection{The big picture}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.25]{report/images/system-dependencies.png}
+    \caption{System dependencies. \href{https://www.google.dk/}{Full size image here}}
+    \label{fig:system-depencencies}
+\end{figure}
+
 \subsection{Important interactions of subsystems}
-\todo{Nu er det her ikke danmarkskortet, så hvad mener i? Er det hvordan de enkelte klasser snakker sammen eller på et komponent niveau?}
+\todo{det her bliver beskrevet ved component diagram og i afsnit 2. Er det overflødigt at have dette afsnit?}
+
 \subsection{Describe the current state of your systems, for example using results of static analysis and quality assessment systems.}
+
+
 \subsection{Finally, describe briefly, if the license that you have chosen for your project is actually compatible with the licenses of all your direct dependencies.}
+The ScanCode toolkit\cite{scancode} were used to scan for all licenses within the MiniTwit repository. The scan here outputted several permissive licenses where the most relevant were MIT and Apache-2.0. Furthermore, the most important finding was that no version of the GPL license were present. This is important, as the GPL is a copyleft license which would require MiniTwit to be a free open-source license\cite{gpl}. Hence, since no copyleft licenses such as GPL are in the project, MiniTwit has a variety of licenses to choose from.\\
+The group chose the permissive MIT license in order to provide everyone with the free right to use the API, as well as keeping the developer team free from being liable of any claims made against any possible damage caused by the API.
+%Need to make a license
+
+%Any of the licenses used that are quite restrictive?
+%Get a high level perspective of the licenses.
+%Any of the tools which require many licenses?
+
+%Does the licenses belong to a specific technology like postgres? Ignore those
+%Look into the licenses which are more general. Only include these in depth, but mention the rest.
+

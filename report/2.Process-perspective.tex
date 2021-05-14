@@ -5,8 +5,18 @@ The team created a Discord channel to function as the main communication channel
 The team used Jira's Kanban Board feature\cite{jira} to gain a better overview of the various tasks. The Kanban consisted of the following columns: "To Do", "In Progress", and "Done". Hence, the team could move the tasks to the corresponding status of its progress, such that the state was visible to the rest of the team members.
 
 \subsection{A complete description of stages and tools included in the CI/CD chains.}
-Rolling updates with --update-order set to start-first
+The CI/CD pipeline uses Github actions, Travis CI, ESLint, and Sonar Cloud. Github actions is run on both the develop and main branch when a pull request or push to the repository is made. \\
 
+ESLint is used through the github action \textit{stefanoeb/eslint-action@1.0.2} \cite{eslint-action} and is performing static code analysis by checking line indentation, unused variables, props passed to React components etc. Travis CI is integrated into the Minitwit repository and is used to run all unit tests within the APIs \cite{travis-ci}. Sonar Cloud is also used to perform static code analysis and checks code smells such as if code duplication exceeds 4\%. It also scans for potential security vulnerabilities \cite{sonarcloud}.\\
+\\
+Furthermore, any push to the master branch with a commit name with the prefix \textit{fix}, \textit{feat} or \textit{BREAKING CHANGE} would cause a Github action to be run which creates a release on the main branch. This is done using the \textit{semantic-release} action \cite{semantic-release}.
+
+\subsubsection{Develop and main branch pipeline}
+On a pull request, the Travis CI, Sonar Cloud and the ESLint Github action are all being run. If they all pass, then the pull request is merged by a developer.\\
+\\
+On a push to one of the branches, three Github actions are run. The actions builds the Frontend, API and Sim-Api Docker images and pushes them to Dockerhub. Once all three builds have finished, a fourth action is started which ssh's into the swarm manager droplet on Digital Ocean and updates the corresponding running services in the swarm using the \textit{docker service update --image name-of-image} command. The ssh action is \textit{appleboy/ssh-action@master}\cite{ssh-action}.
+
+\todo{vi mangler Latex til pdf pipeline}
 
 \subsection{Organization of your repositor(ies)}
 The MiniTwit application was built using a mono-repository on GitHub. The structure in the Repository consisted of a sub-folder for the API (API for the front end and the Simulator API), a sub-folder for the Frontend React Application, and a sub-folder for the report written in Latex. 
@@ -18,17 +28,86 @@ The team applied the task-branching strategy\cite{branching} together with havin
 The team tried to use pair-programming as much as possible as opposed to assigning each member with their own task. Pair programming was preferred to allow most possible members to get hands on experience with the various DevOps themes and to enhance code quality. To facilitate pair-programming, the team utilized Discord's screen sharing functionality as well as Visual Studio Code's Live Share functionality\cite{live_share}. While screen sharing functionality is self-explanatory, the Live Share functionality provided a way for multiple developers to work on the documents simultaneously. 
 
 \subsection{How do you monitor your systems and what precisely do you monitor?}
-Yarl
+%Requests to the server and responses
+%All types of endpoints
+%All types of responses
+%Nothing about performance, which could have been quite nice though
+%Show screenshot of dashboard
+
+%Visualization of everything
+%We could monitor when register happened
+%could monitor the there were more and less load
+%monitor the different types of error. How many last hour and so on..
+\todo{Evt. Yarl som har leget mest med det her?}
 
 \subsection{What do you log in your systems and how do you aggregate logs?}
-Norton
+The system uses a Loki/Promtail/Grafana stack for logging. A loki driver is installed on both the nodes in the docker swarm service with the following command:
+
+\begin{verbatim}
+    docker plugin install grafana/loki-docker-driver:latest
+    --alias loki --grant-all-permissions
+\end{verbatim}
+
+Furthermore, the \textit{/etc/docker/daemon.json} file on both nodes is modified, which allows for all docker containers to redirect their logs to the Loki endpoint via the loki driver.
+
+\begin{verbatim}
+    {
+    "debug" : true,
+    "log-driver": "loki",
+    "log-opts": {
+        "loki-url": "http://161.35.214.217/loki/api/v1/push"
+    }
+}
+\end{verbatim}
+
+This allows us to aggregate logs from all nodes in the docker swarm stack, which is sent to the Grafana dashboard for querying and visualization. Lastly, a Promtail container is deployed to load locally stored logs into Grafana.\\
+
+\noindent
+This stack is chosen for many different reasons:
+\begin{itemize}
+    \item Requires significantly less memory compared to ELK/EFK stack
+    \item Utilizing Grafana for visualization, which is already used by Prometheus
+    \item Easy setup and integration with docker swarm
+\end{itemize}
+
+Furthermore, the collection of logs have utilized the Winston library in order to provide an easier way to maintain how logs are stored and formatted.\cite{winston} As an example, the following so-called CustomLogFormat has been created:
+\begin{verbatim}
+    const customLogFormat = printf(({message, level, timestamp}) => {
+        return `${timestamp} ${level}: ${message}`
+    });
+    
+    const customLogger = createLogger({
+        format: combine(timestamp(), customLogFormat),
+        transports: [new transports.Console()],
+    });
+\end{verbatim}
+This provides a log format to be used which shows the time-stamp of the log, the so-called "level" referring to a logging category, and the log message. Hence, the logs get a common syntax, and if a change is needed in the syntax it happens at a single place.
+
+\todo{Færdiggør nedenstående (hvem end der startede det)}
+\noindent
+For the dashboard we chose to visualize 
+
+\noindent
+Currently no log rotation is implemented
+%logging diagram
+%Why we chose it (already grafana dashboard for monitoring, low memory usage, easy compatibility with docker swarm)
+%Console log (writing to std.out, not worrying about storage)
+%Loki container
+%Screenshot of logs
+%What things do we log from the source code
+%No log rotation (modifying daemon.json)
+%docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
 
 \subsection{Brief results of the security assessment}
+\todo{Færdiggør NMAP (hvem end der startede det)}
 Running NMAP showed the following open ports and services:
 
-None of these have 
+None of these have any exploitable weaknesses. 
 
 \subsection{Applied strategy for scaling and load balancing}
 As already mentioned, the system is hosted in Docker swarm mode with two nodes running on their own droplet in the network. The docker swarm scales horizontally, as more worker nodes running on their own physical machine can join the swarm if the swarm were to be scaled. \\
 \\
-With swarm comes load balancing out of the box. The ingress network exposes the services on the swarm via the routing mesh. The load balancer decides which of the running instances of the requested service the request should end up at\cite{docker-ingress}. This is seen in figure \ref{fig:arcitechture-overview} where an incoming request to the load balancer on the \textit{manager-node-01} droplet is redirected to a container running within the \textit{Minitwit} component of the \textit{worker-node-01} droplet.
+With swarm comes load balancing out of the box. The ingress network exposes the services on the swarm via the routing mesh. The load balancer decides which of the running instances of the requested service the request should end up at\cite{docker-ingress}. This is seen in figure \ref{fig:arcitechture-overview} where an incoming request to the load balancer on the \textit{production-worker} droplet is redirected to a container running within the \textit{Minitwit} component of the \textit{minitwit-webserver} droplet.
+
+\subsubsection{Updating the swarm}
+The swarm is configured to use rolling updates with \textit{--update-order} set to \textit{start-first}. For each service, an updated version is instantiated and monitored for 5 seconds before it is decided to be running successfully. Once running, the old instance of the service is shut down. This rolling update strategy is run for each service for each replica. See appendix \ref{appendix:docker-compose} for the full docker-compose.yml.
