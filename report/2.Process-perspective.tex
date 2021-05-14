@@ -5,18 +5,28 @@ The team created a Discord channel to function as the main communication channel
 The team used Jira's Kanban Board feature\cite{jira} to gain a better overview of the various tasks. The Kanban consisted of the following columns: "To Do", "In Progress", and "Done". Hence, the team could move the tasks to the corresponding status of its progress, such that the state was visible to the rest of the team members.
 
 \subsection{A complete description of stages and tools included in the CI/CD chains.}
-The CI/CD pipeline uses Github actions, Travis CI, ESLint, and Sonar Cloud. Github actions is run on both the develop and main branch when a pull request or push to the repository is made. \\
+\todo{Need better styling}
+The CI/CD pipeline uses Github actions, Travis CI, ESLint, Sonar Cloud, and Semantic Release. Github actions is run on both the develop and main branch when a pull request or push to the repository is made. \\
 
-ESLint is used through the github action \textit{stefanoeb/eslint-action@1.0.2} \cite{eslint-action} and is performing static code analysis by checking line indentation, unused variables, props passed to React components etc. Travis CI is integrated into the Minitwit repository and is used to run all unit tests within the APIs \cite{travis-ci}. Sonar Cloud is also used to perform static code analysis and checks code smells such as if code duplication exceeds 4\%. It also scans for potential security vulnerabilities \cite{sonarcloud}.\\
-\\
-Furthermore, any push to the master branch with a commit name with the prefix \textit{fix}, \textit{feat} or \textit{BREAKING CHANGE} would cause a Github action to be run which creates a release on the main branch. This is done using the \textit{semantic-release} action \cite{semantic-release}.
+ESLint is used through the github action \textit{stefanoeb/eslint-action@1.0.2} \cite{eslint-action} and is performing static code analysis by checking line indentation, unused variables, props passed to React components etc. Travis CI is integrated into the Minitwit repository and is used to run all unit tests within the Minitwit/API folder \cite{travis-ci}. Sonar Cloud is also used to perform static code analysis and checks code smells such as if code duplication exceeds 4\%. It also scans for potential security vulnerabilities \cite{sonarcloud}.
 
-\subsubsection{Develop and main branch pipeline}
-On a pull request, the Travis CI, Sonar Cloud and the ESLint Github action are all being run. If they all pass, then the pull request is merged by a developer.\\
-\\
-On a push to one of the branches, three Github actions are run. The actions builds the Frontend, API and Sim-Api Docker images and pushes them to Dockerhub. Once all three builds have finished, a fourth action is started which ssh's into the swarm manager droplet on Digital Ocean and updates the corresponding running services in the swarm using the \textit{docker service update --image name-of-image} command. The ssh action is \textit{appleboy/ssh-action@master}\cite{ssh-action}.
+\subsubsection{Pull request}
+On a pull request, the Travis CI, Sonar Cloud and the ESLint Github action are all being run. If they all pass, then the developers are allowed to perform the merge.
 
-\todo{vi mangler Latex til pdf pipeline}
+\subsubsection{Push}
+On a push to the main or Develop branch, a \textit{Build and Push} Github action is run. The jobs builds the Frontend, API and Sim-Api Docker images and pushes them to Dockerhub. Once all three jobs have finished, a fourth job is started which ssh's into the swarm manager droplet on Digital Ocean and updates the corresponding running services in the swarm using the \textit{docker service update --image name-of-image} command. The ssh action is \textit{appleboy/ssh-action@master}\cite{ssh-action}. Below is an image taken from the Github action log showing the four jobs:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{report/images/build-and-deploy-action.png}
+    \caption{Build and deploy action successfully run}
+    \label{fig:build-and-deploy}
+\end{figure}
+
+Furthermore, a Github action with the name \textit{Create Release} running \textit{Semantic Release} will act on any push to the master branch with a commit name with the prefix \textit{fix}, \textit{feat} or \textit{BREAKING CHANGE}. If the commit's name fulfills the prefix, the \textit{Semantic Release} will create a new release on the main branch \cite{semantic-release}.
+
+\subsubsection{Automating latex to pdf}
+\todo{vi mangler GitHub action der konverterer Latex-rapporten til PDF}
 
 \subsection{Organization of your repositor(ies)}
 The MiniTwit application was built using a mono-repository on GitHub. The structure in the Repository consisted of a sub-folder for the API (API for the front end and the Simulator API), a sub-folder for the Frontend React Application, and a sub-folder for the report written in Latex. 
@@ -25,7 +35,7 @@ The MiniTwit application was built using a mono-repository on GitHub. The struct
 The team applied the task-branching strategy\cite{branching} together with having both a Main and Develop branch. The Develop branch was initially a mirror of the Main branch and is where new functionality is developed and tested. Once a task is created on Jira and a team member has been assigned to develop it, the developer will create a branch with the task-name off of the Develop branch. Once completed and tested successfully the branch is merged into Develop. Finally, Develop was merged into Main once a week. However, this was not happening weekly in the first weeks of the project due to the team being behind schedule. 
 
 \subsection{Applied development process and tools supporting it}
-The team tried to use pair-programming as much as possible as opposed to assigning each member with their own task. Pair programming was preferred to allow most possible members to get hands on experience with the various DevOps themes and to enhance code quality. To facilitate pair-programming, the team utilized Discord's screen sharing functionality as well as Visual Studio Code's Live Share functionality\cite{live_share}. While screen sharing functionality is self-explanatory, the Live Share functionality provided a way for multiple developers to work on the documents simultaneously. 
+The team tried to use pair-programming in an informal manner as much as possible as opposed to assigning each member with their own task. Pair programming was preferred to allow most possible members to get hands on experience with the various DevOps themes and to enhance code quality. To facilitate pair-programming, the team utilized Discord's screen sharing functionality as well as Visual Studio Code's Live Share functionality\cite{live_share}. While screen sharing functionality is self-explanatory, the Live Share functionality provided a way for multiple developers to work on the documents simultaneously. 
 
 \subsection{How do you monitor your systems and what precisely do you monitor?}
 %Requests to the server and responses
@@ -81,8 +91,8 @@ Furthermore, the collection of logs have utilized the Winston library in order t
         transports: [new transports.Console()],
     });
 \end{verbatim}
-This provides a log format to be used which shows the time-stamp of the log, the so-called "level" referring to a logging category, and the log message. Hence, the logs get a common syntax, and if a change is needed in the syntax it happens at a single place.
-
+This provides a log format to be used which shows the time-stamp of the log, the so-called "log level", and the log message. Hence, the logs get a common syntax, and if a change is needed in the syntax it happens at a single place.
+\\\\
 \todo{Færdiggør nedenstående (hvem end der startede det)}
 \noindent
 For the dashboard we chose to visualize 
@@ -105,9 +115,10 @@ Running NMAP showed the following open ports and services:
 None of these have any exploitable weaknesses. 
 
 \subsection{Applied strategy for scaling and load balancing}
-As already mentioned, the system is hosted in Docker swarm mode with two nodes running on their own droplet in the network. The docker swarm scales horizontally, as more worker nodes running on their own physical machine can join the swarm if the swarm were to be scaled. \\
+As already mentioned, the system is hosted in Docker swarm mode with two nodes running on their own droplets in the network. The docker swarm scales horizontally, as more worker nodes running on their own physical machine can join the swarm if the swarm were to be scaled. \\
 \\
-With swarm comes load balancing out of the box. The ingress network exposes the services on the swarm via the routing mesh. The load balancer decides which of the running instances of the requested service the request should end up at\cite{docker-ingress}. This is seen in figure \ref{fig:arcitechture-overview} where an incoming request to the load balancer on the \textit{production-worker} droplet is redirected to a container running within the \textit{Minitwit} component of the \textit{minitwit-webserver} droplet.
+With swarm comes load balancing out of the box. The ingress network exposes the services on the swarm via the routing mesh. The load balancer decides which of the running instances of the requested service the request should end up at\cite{docker-ingress}. This is seen in figure \ref{fig:arcitechture-overview} where an incoming request to the load balancer on the \textit{production-worker} droplet can be redirected to a container running within the \textit{Minitwit} component of the \textit{minitwit-webserver} droplet.
 
 \subsubsection{Updating the swarm}
-The swarm is configured to use rolling updates with \textit{--update-order} set to \textit{start-first}. For each service, an updated version is instantiated and monitored for 5 seconds before it is decided to be running successfully. Once running, the old instance of the service is shut down. This rolling update strategy is run for each service for each replica. See appendix \ref{appendix:docker-compose} for the full docker-compose.yml.
+The swarm is configured to use rolling updates with \textit{--update-order} set to \textit{start-first}. For each service, an updated version is instantiated and monitored for 5 seconds before it is decided to be running successfully. Once running, the old instance of the service is shut down. This rolling update strategy is run for each service for each replica. See appendix \ref{appendix:docker-compose} for the full docker-compose.yml.\\
+The start-first approach was chosen to guarantee that at least the desired amount of replicas are always run during updates.
