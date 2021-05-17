@@ -239,9 +239,6 @@ router.get("/msgs/:username", async (req, res, next) => {
 
 router.post("/msgs/:username", async (req, res, next) => {
   updateLatest(req);
-  customLogger.log('info',
-    "Received a Post to /msgs/:username with username: " + req.params.username
-  );
 
   var notFromSim = notReqFromSimulator(req);
   if (notFromSim) {
