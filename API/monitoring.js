@@ -46,6 +46,9 @@ class Monitoring {
 	this.msgs_username_response_time = createHistogramMetric('msgs_username_response_time', register, prom)
 	this.register_response_time = createHistogramMetric('register_response_time', register, prom)
 	this.getFollows_response_time = createHistogramMetric('getFollows_response_time', register, prom)
+	this.follow_response_time = createHistogramMetric('follow_response_time', register, prom)
+	this.unfollow_response_time = createHistogramMetric('unfollow_response_time', register, prom)
+	this.messages_response_time = createHistogramMetric('messages_response_time', register, prom)
 
   }
 }

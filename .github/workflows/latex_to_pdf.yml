@@ -16,6 +16,11 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
       - name: Compile LaTeX document
-        uses: dante-ev/latex-action@latest
+        uses: xu-cheng/latex-action@v2
         with:
-          root_file: ./report/main.tex
+          root_file: report/main.tex
+      - name: upload pdf
+        uses: actions/upload-artifact@v2
+        with:
+          name: PDF
+          path: main.pdf

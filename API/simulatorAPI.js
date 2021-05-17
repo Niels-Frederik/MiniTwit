@@ -17,7 +17,7 @@ const sanitizeHtml = require('sanitize-html');
 
 app.use(express.json());
 app.use(beforeMiddleware);
-app.use(logger);
+//app.use(logger);
 
 app.use(router);
 
@@ -123,14 +123,14 @@ router.post("/register", async (req, res, next) => {
   }
   catch (error)
   {
-    customLogger.log("error", "/register error while registering user")
+    customLogger.log("error", "/register error while registering user \n" + error.stack)
     res.sendStatus(500);
     return next(error)
   }
 
   if (errorMessage) 
   {
-    customLogger.log("warn", "/register failed due to insufficient information - " + errorMessage)
+    customLogger.log("warn", "/register failed due to - " + errorMessage)
     res.status(400).send(errorMessage)
   }
   else 
@@ -246,10 +246,8 @@ router.get("/msgs/:username", async (req, res, next) => {
 });
 
 router.post("/msgs/:username", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
-  customLogger.log('info',
-    "Received a Post to /msgs/:username with username: " + req.params.username
-  );
 
   var notFromSim = notReqFromSimulator(req);
   if (notFromSim) {
@@ -296,12 +294,14 @@ router.post("/msgs/:username", async (req, res, next) => {
 	  }
     customLogger.log("info", "/msgs/:username (POST) by userId: " + userid)
     res.sendStatus(204);
+	monitoring.messages_response_time.observe(calculateDeltaTime(startTime))
     next();
     return;
   }
 });
 
 router.post("/fllws/:username", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
   //customLogger.log('info',`follow request\n request body:  ${JSON.stringify(req.body)}\n requst params: ${JSON.stringify(req.params)}`);
   const isFollow = Object.keys(req.body).indexOf("follow") !== -1
@@ -362,6 +362,8 @@ router.post("/fllws/:username", async (req, res, next) => {
 
     customLogger.log("info", "/fllws/:username (follow) request from userId: " + userId + " to userId: " + userToFollowId)
     res.status(204).send(sanitizeHtml("You are now following " + req.body.follow));
+	  monitoring.follow_response_time.observe(calculateDeltaTime(startTime))
+
     next();
     return;
   }
@@ -395,6 +397,8 @@ router.post("/fllws/:username", async (req, res, next) => {
 
     customLogger.log("info", "/fllws/:username (unfollow) request from userId: " + userId + " to userId: " + userToUnFollowId)
     res.status(204).send(sanitizeHtml("You have unfollowed " + req.body.unfollow));
+	  monitoring.unfollow_response_time.observe(calculateDeltaTime(startTime))
+
     next();
     return;
   }
@@ -455,8 +459,6 @@ router.get("/fllws/:username", async (req, res, next) => {
 });
 
 app.use(afterMiddleware);
-
-app.use(errorLogger);
 
 app.listen(port, () => {
   console.log(`app listening at http://localhost:${port}`);

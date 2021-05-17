@@ -53,8 +53,8 @@ Each component in the back-end is one single file and there are no formal interf
 The following list breifly describes each component:
 \begin{enumerate}
     \item Monitoring: Provides functionality to use metrics used for Prometheus
-    \item Logger: Provides logger objects to perform logging
-    \item Repository: Provides an object to query the database
+    \item Logger: Provides logger objects to perform logging by using the \textit{winston} and \textit{express-winston} libraries.
+    \item Repository: Provides a Sequelize ORM object to query the database.
     \item DB Handler: Provides a database object with the database connection and schema.
 \end{enumerate}
 
@@ -91,7 +91,7 @@ The back-end has the following dependencies:
     \label{fig:back-end-depencency-diagram}
 \end{figure}
 
-The source code for this diagram is located at the Minitwit/API folder.
+The source code for this diagram is located at the Minitwit/API folder. 'index.js' runs the api service and 'simulatorAPI.js' runs the sim-api service.\\
 All dependencies in the front-end and back-end uses the last release of the current major release. E.g. the \textit{bcrypt} dependency is \string^5.0.0 and will use future releases up until before the next major release: v6.0.0.
 
 \subsubsection{The big picture}
@@ -99,7 +99,7 @@ All dependencies in the front-end and back-end uses the last release of the curr
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.25, left]{report/images/system-dependencies.png}
+    \includegraphics[scale=0.25]{report/images/system-dependencies.png}
     \caption{System dependencies. \href{https://github.com/Niels-Frederik/MiniTwit/blob/main/report/images/system-dependencies.png}{Click here for full size image}}
     \label{fig:system-depencencies}
 \end{figure}
