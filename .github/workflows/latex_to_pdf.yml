@@ -22,14 +22,14 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           root_file: report/main.tex
-          args: -job-name=report -pdf
+          args: -pdf -jobname=report/report
 
       - name: Commit & Push changes
         uses: actions-js/push@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: 'main'
-          message: 'publish main.pdf'
+          message: 'publish report.pdf'
           force: 'true'
           directory: ./report
           author_email: hampuswadum@hotmail.com 
