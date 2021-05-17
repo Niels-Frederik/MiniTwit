@@ -16,7 +16,7 @@ const monitoring = new Monitor.Monitoring(prom, register);
 
 app.use(express.json());
 app.use(beforeMiddleware);
-app.use(logger);
+//app.use(logger);
 
 app.use(router);
 

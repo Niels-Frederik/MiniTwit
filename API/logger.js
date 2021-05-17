@@ -13,7 +13,6 @@ const customLogFormat = printf(({message, level, timestamp}) => {
     return `${timestamp} ${level}: ${message}`
 })
 
-
 const errorLogFormat = printf(({level, timestamp, message, meta}) => {
     return `${timestamp} ${level}: ${message}, trace:\n ${meta.message}`
 })
