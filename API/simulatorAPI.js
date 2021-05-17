@@ -122,14 +122,14 @@ router.post("/register", async (req, res, next) => {
   }
   catch (error)
   {
-    customLogger.log("error", "/register error while registering user")
+    errorLogger.log("error", "/register error while registering user - stack trace: " + error.stack)
     res.sendStatus(500);
     return next(error)
   }
 
   if (errorMessage) 
   {
-    customLogger.log("warn", "/register failed due to insufficient information - " + errorMessage)
+    customLogger.log("warn", "/register failed due to - " + errorMessage)
     res.status(400).send(errorMessage)
   }
   else 
