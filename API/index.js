@@ -6,6 +6,7 @@ const cors = require('cors')
 const repository = require('./repository')
 const prom = require('prom-client');
 const {logger, errorLogger, customLogger} = require('./logger.js'); // for transports.Console
+const sanitizeHtml = require("sanitize-html");
 
 const register = new prom.Registry();
 
@@ -91,7 +92,7 @@ router.post('/:username/follow', async (req,res) =>
 	}
 
 	await repository.followUserAsync(userId, whomId)
-    res.status(200).send("You are now following " + req.params.username)
+    res.status(200).send(sanitizeHtml("You are now following " + req.params.username))
 })
 
 router.delete('/:username/unfollow', async (req,res) =>
@@ -111,7 +112,7 @@ router.delete('/:username/unfollow', async (req,res) =>
 	}
 
 	await repository.unfollowUserAsync(userId, whomId)
-	res.status(200).send("You are no longer following " + req.params.username)
+	res.status(200).send(sanitizeHtml("You are no longer following " + req.params.username));
 })
 
 router.post('/add_message', async (req,res) =>
@@ -253,7 +254,7 @@ router.get('/:username', async (req,res) =>
 			"followedOptions": followedOptions
 		}
 
-        res.json(obj).send;
+        res.json(obj).send();
     } else {
         res.sendStatus(400);
         return

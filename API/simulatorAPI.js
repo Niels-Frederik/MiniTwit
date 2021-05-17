@@ -13,6 +13,7 @@ const router = express.Router();
 const register = new prom.Registry();
 const Monitor = require("./monitoring");
 const monitoring = new Monitor.Monitoring(prom, register);
+const sanitizeHtml = require('sanitize-html');
 
 app.use(express.json());
 app.use(beforeMiddleware);
@@ -360,7 +361,7 @@ router.post("/fllws/:username", async (req, res, next) => {
 	}
 
     customLogger.log("info", "/fllws/:username (follow) request from userId: " + userId + " to userId: " + userToFollowId)
-    res.status(204).send("You are now following " + req.body.follow);
+    res.status(204).send(sanitizeHtml("You are now following " + req.body.follow));
     next();
     return;
   }
@@ -393,7 +394,7 @@ router.post("/fllws/:username", async (req, res, next) => {
 	}
 
     customLogger.log("info", "/fllws/:username (unfollow) request from userId: " + userId + " to userId: " + userToUnFollowId)
-    res.status(204).send("You have unfollowed " + req.body.unfollow);
+    res.status(204).send(sanitizeHtml("You have unfollowed " + req.body.unfollow));
     next();
     return;
   }
@@ -429,7 +430,7 @@ router.get("/fllws/:username", async (req, res, next) => {
   }
 
   let limit = req.query.no;
-  if (limit == null) limit == 100;
+  if (limit == null) limit = 100;
 
   let result
   try {
