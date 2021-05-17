@@ -245,6 +245,7 @@ router.get("/msgs/:username", async (req, res, next) => {
 });
 
 router.post("/msgs/:username", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
 
   var notFromSim = notReqFromSimulator(req);
@@ -292,12 +293,14 @@ router.post("/msgs/:username", async (req, res, next) => {
 	  }
     customLogger.log("info", "/msgs/:username (POST) by userId: " + userid)
     res.sendStatus(204);
+	monitoring.messages_response_time.observe(calculateDeltaTime(startTime))
     next();
     return;
   }
 });
 
 router.post("/fllws/:username", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
   //customLogger.log('info',`follow request\n request body:  ${JSON.stringify(req.body)}\n requst params: ${JSON.stringify(req.params)}`);
   const isFollow = Object.keys(req.body).indexOf("follow") !== -1
@@ -358,6 +361,7 @@ router.post("/fllws/:username", async (req, res, next) => {
 
     customLogger.log("info", "/fllws/:username (follow) request from userId: " + userId + " to userId: " + userToFollowId)
     res.status(204).send("You are now following " + req.body.follow);
+	monitoring.follow_response_time.observe(calculateDeltaTime(startTime))
     next();
     return;
   }
@@ -391,6 +395,7 @@ router.post("/fllws/:username", async (req, res, next) => {
 
     customLogger.log("info", "/fllws/:username (unfollow) request from userId: " + userId + " to userId: " + userToUnFollowId)
     res.status(204).send("You have unfollowed " + req.body.unfollow);
+	monitoring.unfollow_response_time.observe(calculateDeltaTime(startTime))
     next();
     return;
   }
