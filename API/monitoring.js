@@ -41,6 +41,9 @@ class Monitoring {
 	this.messages_request_counter = createMetric('minintwit_messages_request_counter', register, prom)
 	this.messages_success_counter = createMetric('minintwit_messages_success_counter', register, prom)
 	this.messages_failure_counter = createMetric('minintwit_messages_failure_counter', register, prom)
+
+	this.msgs_response_time = createHistogramMetric('msgs_response_time', register, prom)
+
   }
 }
 
@@ -49,6 +52,17 @@ function createMetric(metricName, register, prom) {
 	name: metricName,
 	help: 'metric_help',
 	registers: [register]
+  });
+  register.registerMetric(metric)
+  return metric;
+}
+
+function createHistogramMetric(metricName, register, prom) {
+  const metric = new prom.Histogram({
+	name: metricName,
+	help: 'duration',
+	registers: [register]
+	buckets: [10, 50, 100, 200, 400, 1000, 2000, 5000, 10000, 15000]
   });
   register.registerMetric(metric)
   return metric;

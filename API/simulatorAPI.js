@@ -132,6 +132,7 @@ router.post("/register", async (req, res, next) => {
 });
 
 router.get("/msgs", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
   var notFromSim = notReqFromSimulator(req);
   if (notFromSim) {
@@ -165,6 +166,7 @@ router.get("/msgs", async (req, res, next) => {
 
   res.send(filteredMsgs);
   customLogger.log('info',"Recived request for messages, and returned " + filteredMsgs.length + " messages")
+  monitoring.msgs_response_time(calculateDeltaTime(startTime))
   next();
   return;
 });
@@ -411,3 +413,7 @@ app.listen(port, () => {
   console.log(`app listening at http://localhost:${port}`);
 });
 
+function calculateDeltaTime(startTime){
+  const endTime = new Date()
+  return endTime/startTime;
+}
