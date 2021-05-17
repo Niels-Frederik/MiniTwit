@@ -23,8 +23,6 @@ jobs:
         with:
           root_file: report/main.tex
 
-      - name: build
-        uses: github-actions-x/hugo@master
       - name: Commit & Push changes
         uses: actions-js/push@master
         with:
