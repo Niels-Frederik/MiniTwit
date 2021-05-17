@@ -92,7 +92,7 @@ router.post('/:username/follow', async (req,res) =>
 	}
 
 	await repository.followUserAsync(userId, whomId)
-    res.status(200).send("You are now following " + req.params.username)
+    res.status(200).send(sanitizeHtml("You are now following " + req.params.username))
 })
 
 router.delete('/:username/unfollow', async (req,res) =>
