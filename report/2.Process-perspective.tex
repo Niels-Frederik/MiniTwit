@@ -37,20 +37,85 @@ The team applied the task-branching strategy\cite{branching} together with havin
 \subsection{Applied development process and tools supporting it}
 The team tried to use pair-programming in an informal manner as much as possible as opposed to assigning each member with their own task. Pair programming was preferred to allow most possible members to get hands on experience with the various DevOps themes and to enhance code quality. To facilitate pair-programming, the team utilized Discord's screen sharing functionality as well as Visual Studio Code's Live Share functionality\cite{live_share}. While screen sharing functionality is self-explanatory, the Live Share functionality provided a way for multiple developers to work on the documents simultaneously. 
 
-\subsection{How do you monitor your systems and what precisely do you monitor?}
-%Requests to the server and responses
-%All types of endpoints
-%All types of responses
-%Nothing about performance, which could have been quite nice though
-%Show screenshot of dashboard
+\subsection{Monitoring and logging}
 
-%Visualization of everything
-%We could monitor when register happened
-%could monitor the there were more and less load
-%monitor the different types of error. How many last hour and so on..
-\todo{Evt. Yarl som har leget mest med det her?}
+\subsubsection{Metrics collection}
+%How do we monitor
+The Prometheus container uses the 'local' network which is configured to use an overlay driver in the docker-compose.yml:
 
-\subsection{What do you log in your systems and how do you aggregate logs?}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{report/images/LocalNetwork1.png}
+    \caption{code snippet from Minitwit/docker-compose.yml}
+    \label{fig:docker-compose-overlay}
+\end{figure}
+\noindent See appendix \ref{appendix:docker-compose} for the full compose file.\\
+The services to be scraped are also running on the 'local' network.\\
+This network configuration allows Prometheus to resolve the virtual ip addresses of all of the api and sim-api service replicas running in the Docker swarm. Prometheus's scraping job is configured in the Minitwit/prometheus.yml:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.66\linewidth]{report/images/LocalNetwork2.png}
+    \caption{code snippet from Minitwit/prometheus.yml}
+    \label{fig:prometheus-scraping}
+\end{figure}
+\noindent See appendix \ref{appendix:prometheus-config} for the full configuration file.\\
+Here, the sim-api job scrapes all sim-api tasks/replicas by executing a DNS query to resolve their ip and then uses the specified \textit{metrics\_path} endpoint to pull the metrics.\\
+As of the current setup, only the sim-api service is being scraped and not the api service.\todo{kan vi nå at fikse dette?}\\
+The monitoring setup uses a pull based monitoring where Prometheus pulls the metrics from the services and Grafana pulls the metrics from Prometheus.\\
+
+%Why is this necessary
+As seen in figure \ref{fig:back-end-depencency-diagram}, both the api and sim-api uses the prom-client library to passively monitor endpoint requests and responses by "sniffing".
+Prom-client is used for the whitebox monitoring as part of both of the api's middleware to monitor the total requests and responses and the individual endpoints and response codes.
+
+%Source code:
+%Using prom-client to set up the monitoring in the monitoring.js 
+%Sets up middlewares in the API endpoints to monitor requests before they get to the endpoints and their responses after the endpoints.
+
+%What precisely do we monitor
+As seen in the figure \ref{fig:Monitoring1}, the Grafana dashboard display graphs for the total amount of requests and responses as well as more precise counters for the requests and responses of each endpoint in the last hour.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{report/images/MonitoringRequest.png}
+    \caption{Request/response monitoring. \href{https://github.com/Niels-Frederik/MiniTwit/blob/main/report/images/MonitoringRequest.png}{Click here for full size image}}
+    \label{fig:Monitoring1}
+\end{figure}
+
+%Reactivate vs proactive monitoring: we probably use proactive?
+%Pull vs push monitoring: grafana and prometheus PULLs information!!!
+%Blackbox monitoring/whitebox monitoring: We monitor existing requests and thereby checks the states and events = whitebox.
+%Passive vs active monitoring: Passive monitoring - "sniffing" other requests
+%Application monitoring: we monitor amount of requests 
+
+No infrastructure monitoring
+
+
+
+The dashboard allows for a quick overview of user activity, 
+%When users are active - for analysis of user activity 
+%More or less load as well as which day registers happende (in test simulation)
+%quick and easy overview of which endpoints fails and how much
+%Endpoints responses... Like do users or the server cause errors in specific endpoints
+%Allowed us to easily see how missing users from downtime cause usererrors in endpoints....
+%Maybe even downtime
+
+
+
+\todo{Se om vi kan lave application monitoring og/eller infrastructure monitoring: response time kunne være fedt}
+%Snak om at vi intet infrastructure har, men hvordan vi kunne have gjort det 
+
+%Future optimizations...
+%API isn't really monitored... only simapi
+
+%Response time
+%Do not implement unless we get more time
+%write about how we would have implemented it as well as why it would be really nice to have
+
+%The state of the Docker Swarm - container overview.
+
+
+\subsubsection{Log collection and aggregation}
 The system uses a Loki/Promtail/Grafana stack for logging. A loki driver is installed on both the nodes in the docker swarm service with the following command:
 
 \begin{verbatim}
@@ -107,6 +172,8 @@ Currently no log rotation is implemented
 %What things do we log from the source code
 %No log rotation (modifying daemon.json)
 %docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
+
+\subsubsection{Acting}
 
 \subsection{Brief results of the security assessment}
 \todo{Færdiggør NMAP (hvem end der startede det)}
