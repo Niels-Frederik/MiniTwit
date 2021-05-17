@@ -166,7 +166,7 @@ router.get("/msgs", async (req, res, next) => {
 
   res.send(filteredMsgs);
   customLogger.log('info',"Recived request for messages, and returned " + filteredMsgs.length + " messages")
-  monitoring.msgs_response_time(calculateDeltaTime(startTime))
+  monitoring.msgs_response_time.observe(calculateDeltaTime(startTime))
   next();
   return;
 });
@@ -415,5 +415,5 @@ app.listen(port, () => {
 
 function calculateDeltaTime(startTime){
   const endTime = new Date()
-  return endTime/startTime;
+  return (endTime-startTime) / 1000; // convert to seconds
 }

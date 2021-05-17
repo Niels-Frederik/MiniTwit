@@ -61,8 +61,8 @@ function createHistogramMetric(metricName, register, prom) {
   const metric = new prom.Histogram({
 	name: metricName,
 	help: 'duration',
-	registers: [register]
-	buckets: [10, 50, 100, 200, 400, 1000, 2000, 5000, 10000, 15000]
+	registers: [register],
+	buckets: [1, 5, 10, 15, 20, 25, 30]
   });
   register.registerMetric(metric)
   return metric;
