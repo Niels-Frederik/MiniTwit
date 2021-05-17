@@ -43,6 +43,9 @@ class Monitoring {
 	this.messages_failure_counter = createMetric('minintwit_messages_failure_counter', register, prom)
 
 	this.msgs_response_time = createHistogramMetric('msgs_response_time', register, prom)
+	this.msgs_username_response_time = createHistogramMetric('msgs_username_response_time', register, prom)
+	this.register_response_time = createHistogramMetric('register_response_time', register, prom)
+	this.getFollows_response_time = createHistogramMetric('getFollows_response_time', register, prom)
 
   }
 }

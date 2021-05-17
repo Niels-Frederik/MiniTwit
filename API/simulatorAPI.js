@@ -110,6 +110,7 @@ router.get("/latest", async (req, res, next) => {
 });
 
 router.post("/register", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
 
   const { username, email, pwd } = req.body;
@@ -136,6 +137,7 @@ router.post("/register", async (req, res, next) => {
     customLogger.log("info", "/register from: " + username)
     res.sendStatus(204);
   }
+  monitoring.register_response_time.observe(calculateDeltaTime(startTime))
   next();
   return;
 });
@@ -184,6 +186,7 @@ router.get("/msgs", async (req, res, next) => {
 });
 
 router.get("/msgs/:username", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
 
   var notFromSim = notReqFromSimulator(req);
@@ -236,6 +239,7 @@ router.get("/msgs/:username", async (req, res, next) => {
   });
 
   res.json(filteredMsgs);
+  monitoring.msgs_username_response_time.observe(calculateDeltaTime(startTime))
   next();
   return;
 });
@@ -397,6 +401,7 @@ router.post("/fllws/:username", async (req, res, next) => {
 });
 
 router.get("/fllws/:username", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
 
   const notReqFromSim = notReqFromSimulator(req);
@@ -443,6 +448,7 @@ router.get("/fllws/:username", async (req, res, next) => {
     });
   }
   res.send({ followers: resultList });
+  monitoring.getFollows_response_time.observe(calculateDeltaTime(startTime))
   next();
   return;
 });
