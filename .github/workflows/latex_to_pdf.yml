@@ -19,3 +19,4 @@ jobs:
         uses: dante-ev/latex-action@latest
         with:
           root_file: report/main.tex
+          compiler: pdflatex
