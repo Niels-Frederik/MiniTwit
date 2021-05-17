@@ -13,26 +13,24 @@ jobs:
   build_latex:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Git repository
-        uses: actions/checkout@v2
+      - name: checkout master
+        uses: actions/checkout@master
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v2
         with:
           root_file: report/main.tex
 
-      - name: checkout
-        uses: actions/checkout@master
-        with:
-          ref: master
       - name: build
         uses: github-actions-x/hugo@master
-      - name: push
-        uses: github-actions-x/commit@v2.8
+      - name: Commit & Push changes
+        uses: actions-js/push@master
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          push-branch: 'main'
-          commit-message: 'publish main.pdf'
-          force-add: 'true'
-          files: report/main.pdf
-          name: Github Action
-          email: hampuswadum@hotmail.com 
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: 'main'
+          message: 'publish main.pdf'
+          force: 'true'
+          directory: ./report
+          author_email: hampuswadum@hotmail.com 
