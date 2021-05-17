@@ -31,5 +31,5 @@ jobs:
           branch: 'main'
           message: 'publish report.pdf'
           force: 'true'
-          directory: ./report
+          directory: ./report/report.pdf
           author_email: hampuswadum@hotmail.com 
