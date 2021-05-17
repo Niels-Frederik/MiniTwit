@@ -121,12 +121,21 @@ router.post("/register", async (req, res, next) => {
   }
   catch (error)
   {
+    customLogger.log("error", "/register error while registering user")
     res.sendStatus(500);
     return next(error)
   }
 
-  if (errorMessage) res.status(400).send(errorMessage)
-  else res.sendStatus(204);
+  if (errorMessage) 
+  {
+    customLogger.log("warn", "/register failed due to insufficient information - " + errorMessage)
+    res.status(400).send(errorMessage)
+  }
+  else 
+  {
+    customLogger.log("info", "/register from: " + username)
+    res.sendStatus(204);
+  }
   next();
   return;
 });
@@ -144,13 +153,15 @@ router.get("/msgs", async (req, res, next) => {
   if (!limit) limit = 100;
   let result;
 
-  try {
-	result = await repo.simulatorGetAllMessagesAsync(limit)
+  try 
+  {
+	  result = await repo.simulatorGetAllMessagesAsync(limit)
   }
   catch (error) 
   {
-	res.sendStatus(500)
-	return next(error)
+    customLogger.log("error", "/msgs error while fetching all messages")
+	  res.sendStatus(500)
+	  return next(error)
   }
   //const result = await repo.simulatorGetAllMessagesAsync(req.query.no || 100)
 
@@ -163,8 +174,8 @@ router.get("/msgs", async (req, res, next) => {
     filteredMsgs.push(filteredMsg);
   });
 
+  customLogger.log("info", "/msgs returned succesfully")
   res.send(filteredMsgs);
-  customLogger.log('info',"Recived request for messages, and returned " + filteredMsgs.length + " messages")
   next();
   return;
 });
@@ -179,15 +190,19 @@ router.get("/msgs/:username", async (req, res, next) => {
     return;
   }
   let userid
-  try {
-	userid = await repo.getUserIdAsync(req.params.username)
+  try 
+  {
+	  userid = await repo.getUserIdAsync(req.params.username)
   }
-  catch (error) {
-	res.sendStatus(500)
-	return next(error)
+  catch (error) 
+  {
+    customLogger.log("error", "/msgs/:username (GET) error while fetching user")
+	  res.sendStatus(500)
+	  return next(error)
   }
 
   if (!userid) {
+    customLogger.log("warn", "/msgs/:username (GET) request from invalid user")
     res.sendStatus(404);
     next();
     return;
@@ -197,12 +212,15 @@ router.get("/msgs/:username", async (req, res, next) => {
   if (!limit) limit = 100;
 
   let result
-  try {
-	result = await repo.simulatorGetUserMessagesAsync(userid, limit)
+  try 
+  {
+	  result = await repo.simulatorGetUserMessagesAsync(userid, limit)
   }
-  catch (error) {
-	res.sendStatus(500)
-	return next(error)
+  catch (error) 
+  {
+    customLogger.log("error", "/msgs/:username (GET) error while fetching messages from userId: " + userid)
+	  res.sendStatus(500)
+	  return next(error)
   }
 
   let filteredMsgs = [];
@@ -234,31 +252,41 @@ router.post("/msgs/:username", async (req, res, next) => {
 
   const text = req.body.content;
   let userid
-  try {
-	userid = await repo.getUserIdAsync(req.params.username)
+  try 
+  {
+	  userid = await repo.getUserIdAsync(req.params.username)
   }
-  catch (error) {
-	res.sendStatus(500)
-	return next(error)
+  catch (error) 
+  {
+    customLogger.log("error", "/msgs/:username (POST) error while fetching user")
+    res.sendStatus(500)
+    return next(error)
   }
 
-  if (userid == null || text == "") {
-    customLogger.log('info',
-      "   - Post failed: " +
-        (userid == null ? "user does not exist" : "message is empty: " + text)
-    );
+  if (userid == null)
+  {
+    customLogger.log("warn", "/msgs/:username (POST) request from invalid user")
     res.sendStatus(400);
     next();
     return;
-  } else {
-	try {
-	  await repo.postMessageAsync(userid, text)
-	}
-	catch (error) {
-	  res.sendStatus(500)
-	  return next(error)
-	}
-
+  } 
+  else if (text == "")
+  {
+    customLogger.log("warn", "/msgs/:username (POST) request with empty text from userId: " + userid)
+    res.sendStatus(400);
+    next();
+    return;
+  }
+  else {
+	  try {
+	    await repo.postMessageAsync(userid, text)
+	  }
+	  catch (error) {
+      customLogger.log("error", "/msgs/:username (POST) error while posting message")
+	    res.sendStatus(500)
+	    return next(error)
+	  }
+    customLogger.log("info", "/msgs/:username (POST) by userId: " + userid)
     res.sendStatus(204);
     next();
     return;
@@ -267,7 +295,8 @@ router.post("/msgs/:username", async (req, res, next) => {
 
 router.post("/fllws/:username", async (req, res, next) => {
   updateLatest(req);
-  customLogger.log('info',`Recieved a Post follow request:\n request body:  ${JSON.stringify(req.body)}\n requst params: ${JSON.stringify(req.params)}`);
+  //customLogger.log('info',`follow request\n request body:  ${JSON.stringify(req.body)}\n requst params: ${JSON.stringify(req.params)}`);
+  const isFollow = Object.keys(req.body).indexOf("follow") !== -1
 
   const notReqFromSim = notReqFromSimulator(req);
 
@@ -278,32 +307,38 @@ router.post("/fllws/:username", async (req, res, next) => {
   }
 
   let userId
-  try {
-	userId = await repo.getUserIdAsync(req.params.username)
-  }
-  catch (error) {
-	res.sendStatus(500)
-	return next(error)
+  try 
+  {
+	  userId = await repo.getUserIdAsync(req.params.username)
+  } 
+  catch (error) 
+  {
+    customLogger.log("error", "/fllws/:username error while fetching user")
+	  res.sendStatus(500)
+	  return next(error)
   }
 
   if (!userId) {
+    customLogger.log("warn", "/fllws/:username (follow) request from invalid user")
     res.sendStatus(404);
     next();
     return;
   }
 
-  if (Object.keys(req.body).indexOf("follow") !== -1) {
+  if (isFollow) {
     //if we should follow the given user
 	let userToFollowId
 	try {
 	  userToFollowId = await repo.getUserIdAsync(req.body.follow)
 	}
 	catch (error) {
+    customLogger.log("error", "/fllws/:username error while fetching user")
 	  res.sendStatus(500)
 	  return next(error)
 	}
 
     if (userToFollowId == null) {
+      customLogger.log("warn", "/fllws/:username (follow) request from userId: " + userId + " to invalid user")
       res.status(404).send("Invalid user to follow");
       next();
       return;
@@ -312,10 +347,12 @@ router.post("/fllws/:username", async (req, res, next) => {
 	  await repo.followUserAsync(userId, userToFollowId)
 	}
 	catch (error) {
+    customLogger.log("error", "/fllws/:username (follow) request from userId: " + userId + " to userId: " + userToFollowId)
 	  res.sendStatus(500)
 	  return next(error)
 	}
 
+    customLogger.log("info", "/fllws/:username (follow) request from userId: " + userId + " to userId: " + userToFollowId)
     res.status(204).send("You are now following " + req.body.follow);
     next();
     return;
@@ -328,11 +365,13 @@ router.post("/fllws/:username", async (req, res, next) => {
 	  userToUnFollowId = await repo.getUserIdAsync(req.body.unfollow)
 	}
 	catch (error) {
+    customLogger.log("error", "/fllws/:username error while fetching user")
 	  res.sendStatus(500)
 	  return next(error)
 	}
 
     if (userToUnFollowId == null) {
+      customLogger.log("warn", "/fllws/:username (unfollow) request from userId: " + userId + " to invalid user")
       res.sendStatus(404, "Invalid user to unfollow");
       next();
       return;
@@ -341,10 +380,12 @@ router.post("/fllws/:username", async (req, res, next) => {
 	  await repo.unfollowUserAsync(userId, userToUnFollowId)
 	}
 	catch (error) {
+    customLogger.log("error", "/fllws/:username (unfollow) request from userId: " + userId + " to userId: " + userToUnFollowId)
 	  res.sendStatus(500)
 	  return next(error)
 	}
 
+    customLogger.log("info", "/fllws/:username (unfollow) request from userId: " + userId + " to userId: " + userToUnFollowId)
     res.status(204).send("You have unfollowed " + req.body.unfollow);
     next();
     return;
