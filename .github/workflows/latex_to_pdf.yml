@@ -19,8 +19,20 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           root_file: report/main.tex
-      - name: upload pdf
-        uses: actions/upload-artifact@v2
+
+      - name: checkout
+        uses: actions/checkout@master
         with:
-          name: PDF
-          path: main.pdf
+          ref: master
+      - name: build
+        uses: github-actions-x/hugo@master
+      - name: push
+        uses: github-actions-x/commit@v2.8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          push-branch: 'main'
+          commit-message: 'publish main.pdf'
+          force-add: 'true'
+          files: report/main.pdf
+          name: Github Action
+          email: hampuswadum@hotmail.com 
