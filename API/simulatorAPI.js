@@ -110,6 +110,7 @@ router.get("/latest", async (req, res, next) => {
 });
 
 router.post("/register", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
 
   const { username, email, pwd } = req.body;
@@ -136,11 +137,13 @@ router.post("/register", async (req, res, next) => {
     customLogger.log("info", "/register from: " + username)
     res.sendStatus(204);
   }
+  monitoring.register_response_time.observe(calculateDeltaTime(startTime))
   next();
   return;
 });
 
 router.get("/msgs", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
   var notFromSim = notReqFromSimulator(req);
   if (notFromSim) {
@@ -176,11 +179,14 @@ router.get("/msgs", async (req, res, next) => {
 
   customLogger.log("info", "/msgs returned succesfully")
   res.send(filteredMsgs);
+  customLogger.log('info',"Recived request for messages, and returned " + filteredMsgs.length + " messages")
+  monitoring.msgs_response_time.observe(calculateDeltaTime(startTime))
   next();
   return;
 });
 
 router.get("/msgs/:username", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
 
   var notFromSim = notReqFromSimulator(req);
@@ -233,6 +239,7 @@ router.get("/msgs/:username", async (req, res, next) => {
   });
 
   res.json(filteredMsgs);
+  monitoring.msgs_username_response_time.observe(calculateDeltaTime(startTime))
   next();
   return;
 });
@@ -391,6 +398,7 @@ router.post("/fllws/:username", async (req, res, next) => {
 });
 
 router.get("/fllws/:username", async (req, res, next) => {
+  const startTime = new Date()
   updateLatest(req);
 
   const notReqFromSim = notReqFromSimulator(req);
@@ -437,6 +445,7 @@ router.get("/fllws/:username", async (req, res, next) => {
     });
   }
   res.send({ followers: resultList });
+  monitoring.getFollows_response_time.observe(calculateDeltaTime(startTime))
   next();
   return;
 });
@@ -449,3 +458,7 @@ app.listen(port, () => {
   console.log(`app listening at http://localhost:${port}`);
 });
 
+function calculateDeltaTime(startTime){
+  const endTime = new Date()
+  return (endTime-startTime) / 1000; // convert to seconds
+}
