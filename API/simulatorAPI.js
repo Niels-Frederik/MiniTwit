@@ -122,7 +122,7 @@ router.post("/register", async (req, res, next) => {
   }
   catch (error)
   {
-    errorLogger.log("error", "/register error while registering user - stack trace: " + error.stack)
+    customLogger.log("error", "/register error while registering user - stack trace: " + error.stack)
     res.sendStatus(500);
     return next(error)
   }
