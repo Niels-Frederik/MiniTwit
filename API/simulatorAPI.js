@@ -457,8 +457,6 @@ router.get("/fllws/:username", async (req, res, next) => {
 
 app.use(afterMiddleware);
 
-app.use(errorLogger);
-
 app.listen(port, () => {
   console.log(`app listening at http://localhost:${port}`);
 });
