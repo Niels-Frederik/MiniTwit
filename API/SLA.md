@@ -5,7 +5,7 @@ Last updated: 13/05/2021
 
 ## Introduction
 
-This Service Level Agreement applies to the MiniTwit API and is limited to the API. The SLA hereof does not apply to external libraries used in the API.
+This Service Level Agreement applies to the MiniTwit API and is limited to the API.
 The SLA will be updated on a recurring basis, but your version only renews to the latest upon using the API. The SLA in the details section provides metrics which the MiniTwit API has a history of being able to live up to.
 
 ## General Terms
@@ -22,5 +22,5 @@ The metrics are measured since from the 14/04/2021 - 14/05/2021, since the archi
 The following metrics are to be expected of the users of Minitwit to be guaranteed:
 
 * Monthly Uptime Percentage: 100%
-* Response time on POST requests: from ~0.0250s to ~1.02s
-* Response time on GET requests: from ~16.8s to ~35.2s
+* Response time on POST requests: responsese time varying from ~0.0250s to ~1.02s
+* Response time on GET requests: maximum response time of 100ms
