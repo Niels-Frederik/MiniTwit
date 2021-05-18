@@ -26,7 +26,7 @@ async function getTimelineAsync(userId, per_page) {
 			]
 		},
 		raw: true,
-		order: [['pub_date', 'DESC']],
+		order: [['message_id', 'DESC']],
 		attributes: ['user.username', 'text', 'pub_date'],
 		limit: per_page
 	})
@@ -43,7 +43,7 @@ async function getPublicTimelineAsync(per_page) {
 			flagged: 0
 		},
 		raw: true,
-		order: [['pub_date', 'DESC']],
+		order: [['message_id', 'DESC']],
 		attributes: ['user.username', 'text', 'pub_date'],
 		limit: per_page
 	});
@@ -143,7 +143,7 @@ async function simulatorGetAllMessagesAsync(limit) {
           flagged: 0,
         },
         raw: true,
-        order: [["pub_date", "DESC"]],
+        order: [["message_id", "DESC"]],
         attributes: ["user.username", "text", "pub_date"],
         limit: limit,
       });
@@ -162,7 +162,7 @@ async function simulatorGetUserMessagesAsync(userId, limit) {
           author_Id: userId,
         },
         raw: true,
-        order: [["pub_date", "DESC"]],
+        order: [["message_id", "DESC"]],
         attributes: ["user.username", "text", "pub_date"],
         limit: limit,
       });
