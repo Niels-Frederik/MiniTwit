@@ -22,5 +22,5 @@ The metrics are measured from the 14/04/2021 - 14/05/2021, since the architectur
 The following metrics are to be expected of the users of Minitwit to be guaranteed:
 
 * Monthly Uptime Percentage: 100%
-* Response time on POST requests: responsese time varying from ~0.0250s to ~1.02s
+* Response time on POST requests: response time varying from ~0.0250s to ~1.02s
 * Response time on GET requests: maximum response time of 100ms
