@@ -18,7 +18,7 @@ The SLA will be updated on a recurring basis, but your version only renews to th
 
 ## SLA details
 
-The metrics are measured from the 14/04/2021 - 14/05/2021, since the architecture switched to docker swarm, providing a more reliable service.
+The metrics are measured from the 14/05/2021 - 17/05/2021 because an error erased past data.
 The following metrics are to be expected of the users of Minitwit to be guaranteed:
 
 * Monthly Uptime Percentage: 99.99%
